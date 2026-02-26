@@ -3,23 +3,29 @@
 
 \ifproject
 \begin{abstractTH}
-เขียนบทคัดย่อของโครงงานที่นี่
 
-การเขียนรายงานเป็นส่วนหนึ่งของการทำโครงงานวิศวกรรมคอมพิวเตอร์
-เพื่อทบทวนทฤษฎีที่เกี่ยวข้อง อธิบายขั้นตอนวิธีแก้ปัญหาเชิงวิศวกรรม และวิเคราะห์และสรุปผลการทดลองอุปกรณ์และระบบต่างๆ
-\enskip อย่างไรก็ดี การสร้างรูปเล่มรายงานให้ถูกรูปแบบนั้นเป็นขั้นตอนที่ยุ่งยาก
-แม้ว่าจะมีต้นแบบสำหรับใช้ในโปรแกรม Microsoft Word แล้วก็ตาม
-แต่นักศึกษาส่วนใหญ่ยังคงค้นพบว่าการใช้งานมีความซับซ้อน และเกิดความผิดพลาดในการจัดรูปแบบ กำหนดเลขหัวข้อ และสร้างสารบัญอยู่
-\enskip ภาควิชาวิศวกรรมคอมพิวเตอร์จึงได้จัดทำต้นแบบรูปเล่มรายงานโดยใช้ระบบจัดเตรียมเอกสาร
-\LaTeX{} เพื่อช่วยให้นักศึกษาเขียนรายงานได้อย่างสะดวกและรวดเร็วมากยิ่งขึ้น
+โครงงานนี้มีวัตถุประสงค์เพื่อประเมินความเสี่ยงด้านความเป็นส่วนตัวของข้อมูลในโมเดลภาษาขนาดใหญ่
+\\ (LLMs) 
+สำหรับบริบทภาษาไทย โดยเน้นการวิเคราะห์การโจมตีประเภท Data Extraction Attack
+\\ (DEA) และ 
+Jailbreak Attack (JA) ผ่านตัวแปรด้านระดับภาษาไทย 5 ระดับ ได้แก่ ระดับพิธีการ, ทางการ, 
+กึ่งทางการ, ไม่เป็นทางการ และกันเอง การทดลองดำเนินการบนโมเดล Llama-3.1-8b-instant, 
+\\Meta-llama-llama-4-maverick-17b-128e-instruct และ 
+Moonshotai-kimi-k2-instruct-0905 
+
+ผลการทดลองชี้ให้เห็นว่า Llama-3.1-8B-instant มีความต้านทานต่อ DEA ดีที่สุด ขณะที่ Meta-llama-llama-4-maverick-17b-128e-instruct 
+มีประสิทธิภาพสูงสุดในการรับมือกับ JA สำหรับการเพิ่มความมั่นคงปลอดภัย ผลการวิจัยยืนยันว่ากลไก Scrubbing 
+เหมาะสมสำหรับการป้องกันการรั่วไหลของข้อมูล PII ในขณะที่ Defensive Prompting ให้ผลลัพธ์ที่ดีกว่าในการป้องกันการเจาะระบบ 
+(Jailbreak) สรุปผลการศึกษาให้แนวทางในการเลือกใช้โมเดลและกลไกป้องกันที่เหมาะสมเพื่อลดความเสี่ยงด้านความเป็น
+\\ส่วนตัวในบริบทการใช้งานภาษาไทย
+
 \end{abstractTH}
 
 \begin{abstract}
-The abstract would be placed here. It usually does not exceed 350 words
-long (not counting the heading), and must not take up more than one (1) page
-(even if fewer than 350 words long).
 
-Make sure your abstract sits inside the \texttt{abstract} environment.
+This project aims to assess data privacy risks in Large Language Models (LLMs) within the Thai context, specifically focusing on the analysis of Data Extraction Attacks (DEA) and Jailbreak Attacks (JA). The evaluation is conducted across five levels of Thai linguistic registers: formal, official, semi-formal, informal, and casual. Experiments were performed on three models: Llama-3.1-8B-instant, Meta-Llama-4-Maverick-17B-128e-instruct, and Moonshotai-Kimi-K2-instruct-0905.
+
+Experimental results indicate that Llama-3.1-8B-instant exhibits the highest resistance to DEA, while Meta-Llama-4-Maverick-17B-128e-instruct demonstrates the highest effectiveness in mitigating JA. Regarding security enhancement, the research confirms that the Scrubbing mechanism is most suitable for preventing Personal Identifiable Information (PII) leakage. In contrast, Defensive Prompting proves superior in preventing jailbreak attempts. This study concludes by providing practical guidelines for selecting appropriate models and defense strategies to minimize data privacy risks in Thai language applications.
 \end{abstract}
 
 \iffalse
@@ -31,10 +37,18 @@ Dedication page is optional.
 \fi % \iffalse
 
 \begin{acknowledgments}
-Your acknowledgments go here. Make sure it sits inside the
-\texttt{acknowledgment} environment.
 
-\acksign{2020}{5}{25}
+โครงงานวิจัยฉบับนี้สำเร็จลุล่วงไปได้ด้วยความกรุณาอย่างยิ่งจากอาจารย์จักรพงศ์ นาทวิชัย 
+อาจารย์ที่ปรึกษา
+\\ โครงงาน ที่ได้สละเวลาให้คำปรึกษา แนะนำแนวทางในการศึกษา และช่วยแก้ไขข้อบกพร่องต่าง ๆ ตลอดระยะเวลาการดำเนินงาน เพื่อให้งานวิจัยมีความสมบูรณ์และถูกต้องตามหลักวิชาการ คณะผู้จัดทำขอกราบขอบพระคุณเป็นอย่างสูงไว้ ณ ที่นี้
+
+คณะผู้จัดทำขอขอบพระคุณ ภาควิชาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่ เป็นอย่างสูง สำหรับการสนับสนุนด้านงบประมาณในการเข้าถึงทรัพยากรทางเทคนิค (API) และการเอื้อเฟื้อสถานที่ในการดำเนินงานวิจัย  รวมถึงขอบพระคุณคณาจารย์ทุกท่านที่ได้ประสิทธิ์ประสาทวิชาความรู้ ซึ่งเป็นรากฐานสำคัญในการพัฒนาโครงงานวิจัยในครั้งนี้
+
+นอกจากนี้ คณะผู้จัดทำขอแสดงความนับถือและขอบคุณงานวิจัย "LLM-PBE: Assessing Data Privacy in Large Language Models" สำหรับการนำเสนอกรอบแนวคิดและระเบียบวิธีวิจัยอันทรงคุณค่า ซึ่งคณะผู้จัดทำได้นำมาอ้างอิงและพัฒนาต่อยอดเพื่อศึกษาผลกระทบในบริบทภาษาไทย 
+
+ท้ายที่สุดนี้ คณะผู้จัดทำขอกราบขอบพระคุณบิดา มารดา และครอบครัว ที่ให้การสนับสนุนและเป็นกำลังใจสำคัญเสมอมา รวมถึงเพื่อนนักศึกษาทุกคนที่ให้ความช่วยเหลือและแลกเปลี่ยนความคิดเห็นตลอดการทำโครงงานวิจัย
+
+\acksign{2026}{2}{26}
 \end{acknowledgments}%
 \fi % \ifproject
 
