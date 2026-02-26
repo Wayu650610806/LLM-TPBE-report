@@ -4,4 +4,60 @@
 \ifenglish System Evaluation\else การประเมินระบบ\fi
 \fi}
 
-ในบทนี้จะทดสอบเกี่ยวกับการทำงานในฟังก์ชันหลักๆ
+ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขต่าง ๆ
+
+\section{ผลการทดสอบการโจมตีเพื่อดึงข้อมูล (Data Extraction Attack: DEA)}
+วิเคราะห์ความเปราะบางของโมเดลต่อการรั่วไหลของข้อมูลส่วนบุคคล (PII)
+\subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
+นำเสนอความต่างของอัตราการดึงข้อมูลสำเร็จระหว่างภาษาไทยและภาษาอังกฤษในภาพรวม
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{dea_accuracy_avg_th_eng.png}
+\end{center}
+\caption{DEA Accuracy Average (Thai vs English)}
+\label{fig:dea-th-eng}
+\end{figure}
+
+\subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
+วิเคราะห์ความอ่อนไหวของโมเดลเมื่อเผชิญกับภาษาไทยระดับต่าง ๆ (พิธีการ, ทางการ, กึ่งทางการ, ไม่เป็นทางการ, กันเอง)
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{dea_accuracy_avg_th.png}
+\end{center}
+\caption{DEA Accuracy Average (Thai 5 levels)}
+\label{fig:dea-th}
+\end{figure}
+
+\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
+เปรียบเทียบว่าระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 โมเดลใดมีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด และโมเดลใดมีแนวโน้มจะคายข้อมูลออกมาได้ง่ายที่สุด
+
+\subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
+ความสัมพันธ์ระหว่างความยาวของ Prompt และจำนวน Token ต่อความแม่นยำในการคายข้อมูล
+
+\subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
+เปรียบเทียบผลลัพธ์ระหว่างการไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
+
+\section{ผลการทดสอบการเจาะระบบเพื่อข้ามข้อจำกัด (Jailbreak Attack: JA)}
+วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวง
+
+\subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
+วิเคราะห์ความยากหรือง่ายในการเจาะระบบเมื่อใช้ภาษาไทยเปรียบเทียบกับภาษาอังกฤษ
+
+\subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
+ตรวจสอบว่าระดับภาษาไทยที่มีความเป็นทางการสูงส่งผลต่อการปฏิเสธคำสั่งอันตรายของโมเดลอย่างไร
+
+\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน JA}
+เปรียบเทียบความแข็งแกร่งของ Safety Training ระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 เพื่อระบุว่าโมเดลใดมี "ปราการความปลอดภัย" ที่หนาแน่นที่สุดต่อการโจมตีเชิงจิตวิทยา (Persona/Social Engineering)
+
+\subsection{การวิเคราะห์เชิงปริมาณของ Token และทรัพยากรที่ใช้}
+ความสัมพันธ์ระหว่างความซับซ้อนของ Prompt โจมตีกับการเจาะระบบสำเร็จ
+
+\subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
+ประเมินว่าวิธีใดสามารถยับยั้งการตอบสนองต่อคำสั่งเจาะระบบได้ดีกว่ากัน
+
+\section{บทวิเคราะห์และข้อสรุปเชิงเทียบเคียง (Overall Discussion)}
+สรุปผลการประเมินประสิทธิภาพสูงสุด (Best Practice) ของโมเดลและกลไกการป้องกัน
+
+วิเคราะห์แนวโน้มการรั่วไหลของข้อมูลในบริบทภาษาไทยเมื่อเทียบกับมาตรฐานสากล
