@@ -112,19 +112,36 @@
     \planitem{3}{2026}{3}{2026}{จัดทำรายงานฉบับสมบูรณ์และเตรียมนำเสนอผลงาน}
 \end{plan}
 
+\section{\ifenglish Budget plan\else แผนการใช้งบประมาณ\fi}
+
+\ifenglish
+The total budget for this project was 8,014.61 Baht, which can be divided into two main parts as follows:
+\begin{enumerate}
+    \item \textbf{Groq API Processing Costs} (over 90\% of the budget): 7,401.11 Baht was allocated for executing Data Extraction Attack (DEA) and Jailbreak Attack (JA) scenarios. The execution included 5 rounds for each of the 5 Thai language levels and 5 rounds for English (totaling 60 execution rounds). Each round consisted of approximately 3,000 prompts.
+    \item \textbf{Data Preparation and Presentation Costs} (10\% of the budget): 613.50 Baht was used for translating the English dataset into 5 Thai language levels (a total of 15,000 prompts) and for producing the project poster.
+\end{enumerate}
+\else
+ในการดำเนินโครงงานนี้ มีการใช้งบประมาณทั้งสิ้น 8,014.61 บาท (จากค่างบประมาณที่ได้รับ 8,000 บาท) โดยสามารถจำแนกสัดส่วนการใช้งบประมาณออกเป็น 2 ส่วนหลัก ดังนี้:
+\begin{enumerate}
+    \item \textbf{ค่าใช้จ่ายสำหรับการประมวลผลผ่าน Groq API} (สัดส่วนมากกว่าร้อยละ 90 ของงบประมาณ): เป็นจำนวนเงิน 7,401.11 บาท ถูกใช้เพื่อบรรลุวัตถุประสงค์ในการรันการโจมตีรูปแบบ Data Extraction Attack (DEA) และ Jailbreak Attack (JA) โดยดำเนินการทดสอบในภาษาไทยทั้ง 5 ระดับภาษา อย่างละ 5 รอบ และภาษาอังกฤษอีก 5 รอบ (รวมเป็น 60 รอบการทดสอบ) ซึ่งในแต่ละรอบประกอบด้วยคำสั่ง (Prompts) จำนวนประมาณ 3,000 คำสั่ง
+    \item \textbf{ค่าใช้จ่ายสำหรับการแปลงข้อมูลและจัดทำสื่อนำเสนอ} (สัดส่วนร้อยละ 10 ของงบประมาณ): เป็นจำนวนเงิน 613.50 บาท ถูกใช้สำหรับการแปลงข้อมูลชุดทดสอบจากภาษาอังกฤษเป็นภาษาไทย 5 ระดับภาษา (จำนวน 15,000 คำสั่ง) รวมถึงค่าใช้จ่ายในการจัดทำโปสเตอร์ (Poster) เพื่อใช้ประกอบการนำเสนอผลงาน
+\end{enumerate}
+\fi
+
 \section{\ifenglish Roles and responsibilities\else บทบาทและความรับผิดชอบ\fi}
 เพื่อให้การดำเนินงานวิจัยเป็นไปอย่างมีประสิทธิภาพ คณะผู้จัดทำได้แบ่งหน้าที่ความรับผิดชอบตามความ \\เชี่ยวชาญและเนื้อหางาน ดังนี้:
 \begin{enumerate}
     \item กิตติวินท์ พรรณเชษฐ์
         \begin{itemize}
             \item ออกแบบชุดคำสั่งสำหรับการโจมตีทั้งรูปแบบ Data Extraction Attack (DEA) และ Jailbreak Attack (JA)
-            \item รับผิดชอบการรันการโจมตีในระดับภาษาทางการ (Ceremonial) และระดับภาษากึ่งทางการ (Semi-formal)
+            \item รับผิดชอบการรันการโจมตีในระดับภาษาทางการ (Ceremonial) และระดับภาษากึ่งทางการ (Semi-formal) 
             \item ออกแบบและแก้ไขค่ามาตรวัด JA ในส่วนของข้อมูลติดต่อ
             \item วิเคราะห์ผลลัพธ์การโจมตี DEA และ JA ร่วมกับทีมเพื่อนำไปสู่การสรุปผลเชิงสถิติและการทำ Visualization
+            \item รับผิดชอบการแปลชุดคำสั่ง JA จากภาษาอังกฤษเป็นภาษาไทยครอบคลุมทั้ง 5 ระดับภาษา
+            \item ออกแบบกลไกการป้องกัน และดำเนินการทดสอบระบบ Input Scrubbing ของการโจมตี DEA
         \end{itemize}
     \item พิพัฒน์พงศ์ กาวิลดง
         \begin{itemize}
-            \item รับผิดชอบการแปลชุดคำสั่ง JA จากภาษาอังกฤษเป็นภาษาไทยครอบคลุมทั้ง 5 ระดับภาษา
             \item รับผิดชอบหลักในการรันการโจมตีในระดับภาษาไม่เป็นทางการ (Informal) และการรันผลการโจมตีในรอบภาษาอังกฤษสำหรับทุกโมเดล (Semi-formal)
             \item พัฒนาและแก้ไขโครงสร้าง Code สำหรับการจัดการเส้นทางข้อมูล (Path), การสร้างจุดบันทึกผล (Checkpoint) และการประยุกต์ใช้ Defensive Prompting ร่วมกับ JA
             \item ออกแบบมาตรวัด JA และจัดทำสื่อนำเสนอผลงานสำหรับการรายงานความก้าวหน้า
@@ -133,7 +150,7 @@
         \begin{itemize}
             \item ดำเนินการแปลชุดคำสั่งปริมาณมาก (Batch Processing) ผ่าน OpenAI API ให้ครอบคลุมทุกระดับภาษา
             \item รับผิดชอบการรันการโจมตีในระดับภาษาทางการ (Formal) และภาษาอังกฤษ รวมถึงการบริหารจัดการ API Key ผ่านระบบ Organization ของ Groq
-            \item พัฒนามาตรวัด JA ให้สมบูรณ์ วิเคราะห์ Keyword เพื่อออกแบบกลไกการป้องกัน และดำเนินการทดสอบระบบ Input Scrubbing
+            \item พัฒนามาตรวัด JA ให้สมบูรณ์ วิเคราะห์ Keyword เพื่อออกแบบกลไกการป้องกัน และดำเนินการทดสอบระบบ Input Scrubbing ของการโจมตี JA
             \item จัดการระบบควบคุมเวอร์ชันของซอร์สโค้ด (Version Control) และวิเคราะห์ผลลัพธ์เพื่อสร้าง Visualization
         \end{itemize}
     \item วายุ ทะไร
