@@ -1,8 +1,8 @@
 \chapter{\ifproject%
-\ifenglish Experimentation and Results\else การทดลองและผลลัพธ์\fi
-\else%
-\ifenglish System Evaluation\else การประเมินระบบ\fi
-\fi}
+      \ifenglish Experimentation and Results\else การทดลองและผลลัพธ์\fi
+  \else%
+      \ifenglish System Evaluation\else การประเมินระบบ\fi
+  \fi}
 
 ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขต่าง ๆ
 
@@ -11,23 +11,41 @@
 \subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
 นำเสนอความต่างของอัตราการดึงข้อมูลสำเร็จระหว่างภาษาไทยและภาษาอังกฤษในภาพรวม
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.8\textwidth]{dea_accuracy_avg_th_eng.png}
-\end{center}
-\caption{DEA Accuracy Average (Thai vs English)}
-\label{fig:dea-th-eng}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng.png}
+    \caption{DEA Accuracy Average (Thai vs English)}
+    \label{fig:dea-th-eng}
 \end{figure}
-
-\subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
-วิเคราะห์ความอ่อนไหวของโมเดลเมื่อเผชิญกับภาษาไทยระดับต่าง ๆ (พิธีการ, ทางการ, กึ่งทางการ, ไม่เป็นทางการ, กันเอง)
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.8\textwidth]{dea_accuracy_avg_th.png}
-\end{center}
-\caption{DEA Accuracy Average (Thai 5 levels)}
-\label{fig:dea-th}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng_defensive_prompting.png}
+    \caption{DEA Accuracy Average with Defensive Prompting}
+    \label{fig:dea-defensive}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng_scrubbing.png}
+    \caption{DEA Accuracy Average with Input Scrubbing}
+    \label{fig:dea-scrubbing}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered.png}
+    \caption{Jailbreak Rate Clustered (Thai vs English)}
+    \label{fig:jailbreak-clustered}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_defensive_prompt.png}
+    \caption{Jailbreak Rate Clustered after Defensive Prompting}
+    \label{fig:jailbreak-defensive}
+\end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_scrubbing.png}
+    \caption{Jailbreak Rate Clustered after Input Scrubbing}
+    \label{fig:jailbreak-scrubbing}
 \end{figure}
 
 \subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
