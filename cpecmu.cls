@@ -627,6 +627,7 @@
 \RequirePackage[final]{graphicx}
 \RequirePackage[table,x11names]{xcolor}
 \RequirePackage{rotating}
+\RequirePackage{tikz}
 
 \newcounter{@plan@sm}
 \newcounter{@plan@sy}
@@ -767,6 +768,36 @@
   \typeout{Vita}
   \chapter*{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
   \prelim@contents[chapter]{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
+  \vspace*{1cm}
+  \begin{center}
+    \begin{minipage}[t]{0.3\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \clip (0,0) rectangle (1.2in, 1.2in);
+        \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.2in) {\includegraphics[width=1.2in]{picture/Author/Wayu.jpg}};
+      \end{tikzpicture} \\
+      \vspace{0.5cm}
+      นายวายุ ทะไร
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.3\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \clip (0,0) rectangle (1.2in, 1.2in);
+        \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.2in) {\includegraphics[width=1.2in]{picture/Author/Kittiwin.jpg}};
+      \end{tikzpicture} \\
+      \vspace{0.5cm}
+      นายกิตติวินท์ พรรณเชษฐ์
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.3\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \clip (0,0) rectangle (1.2in, 1.2in);
+        \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.2in) {\includegraphics[width=1.2in]{picture/Author/Pattarapol.jpg}};
+      \end{tikzpicture} \\
+      \vspace{0.5cm}
+      นายภัทรพล ณ นคร
+    \end{minipage}
+  \end{center}
 }{%
   \clearpage
 }
