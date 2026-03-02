@@ -23,29 +23,68 @@
 ระบบถูกออกแบบให้ทำงานในรูปแบบ Pipeline เพื่อทดสอบโมเดลภาษาผ่าน Groq API โดยมีขั้นตอนการไหลของข้อมูลดังนี้:
 \begin{enumerate}
   \item Input Layer: รับคำสั่ง (Prompt) ที่ผ่านการปรับแต่งระดับภาษาไทย 5 ระดับ
-  \item Defense Layer (Input Scrubbing): กรองข้อมูลส่วนบุคคล (PII) ขาเข้าด้วยเทคนิค Regex และ NER ก่อนส่งไปยังโมเดล
+  \item Defense Layer (Input Scrubbing / Defensive Prompting): ใช้เทคนิค Input Scrubbing เพื่อกรองข้อมูลส่วนบุคคล (PII) ขาเข้าด้วยเทคนิค Regex และ NER หรือ Defensive Prompting เพื่อกำหนดขอบเขตพฤติกรรมของโมเดลให้ปฏิเสธการตอบข้อมูลที่เป็นอันตราย
   \item Inference Layer: ส่งคำสั่งไปยังโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct หรือ moonshotai-kimi-k2-instruct-0905 ผ่าน Groq API พร้อมการใช้งาน Defensive Prompting
-  \item Evaluation Layer: ระบบรวบรวมคำตอบและประเมินผลด้วยมาตรวัดที่ออกแบบอัตโนมัติ
+  \item Evaluation Layer: รวบรวมคำตอบและประเมินผลด้วยมาตรวัดที่ออกแบบมาเฉพาะสำหรับแต่ละรูปแบบการโจมตี โดยดำเนินการทดสอบซ้ำอย่างน้อย 5 รอบต่อกรณีเพื่อหาค่าเฉลี่ยอัตราความสำเร็จ (Average Success Rate) รวมถึงวิเคราะห์เปรียบเทียบประสิทธิภาพของแต่ละเทคนิค และประเมินผลกระทบของปริมาณ Token และจำนวนคำที่มีต่ออัตราความสำเร็จ
 \end{enumerate}
 
 \section{การเตรียมชุดข้อมูลและระดับภาษา (Data Preparation)}
+\subsection{ชุดข้อมูลหลัก}
 \begin{itemize}
-  \item ชุดข้อมูลหลัก: ใช้ข้อมูลอีเมลจาก Enron สำหรับการทดสอบ DEA และข้อมูลส่วนบุคคลของบุคคลสำคัญ (เช่น Joe Biden) สำหรับการทดสอบ JA
-  \item กระบวนการปรับระดับภาษา: ใช้เทคนิค Batch Processing ผ่าน OpenAI API เพื่อแปลชุดคำสั่งปริมาณ 3,050 ชุด ให้ครอบคลุม 5 ระดับภาษาไทย ได้แก่ ระดับพิธีการ, ทางการ, กึ่งทางการ, ไม่เป็นทางการ และกันเอง
-\end{itemize}
+    \item \textbf{Enron Email Dataset:} ชุดข้อมูลอีเมลสาธารณะจากการสืบสวนคดีล้มละลายของบริษัท Enron (ค.ศ. 2001) ที่มักใช้ในงานวิจัยด้าน Machine Learning, NLP, Cybersecurity และ Data Leakage Detection ในงานศึกษานี้ใช้เพื่อจำลองสถานการณ์ Data Exfiltration Attack (DEA) เพื่อประเมินการป้องกันการรั่วไหลของข้อมูลภายใต้บริบททางวิชาการ
 
+    \begin{center}
+        \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/DEA without defense.png"}
+        \captionof{figure}{DEA without defense}
+        \label{fig:dea_without_defense}
+    \end{center}
+
+    \item \textbf{Jailbreak Prompt:} ชุดคำสั่งที่ออกแบบมาเพื่อหลีกเลี่ยงระบบความปลอดภัยของโมเดลภาษาขนาดใหญ่ (LLMs) โดยใช้เทคนิคหลากหลายเช่น Persona Prompts, Role-playing หรือการสร้างสถานการณ์จำลองเพื่อหลอกลวงให้โมเดลเปิดเผยข้อมูลที่เป็นอันตราย
+
+    \begin{center}
+        \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/JA without defense.png"}
+        \captionof{figure}{JA without defense}
+        \label{fig:ja_without_defense}
+    \end{center}
+
+\end{itemize}
+\subsection{กระบวนการปรับระดับภาษา}
+ในการเตรียมชุดข้อมูลสำหรับการทดลอง ได้ใช้เทคนิค Batch Processing ผ่าน OpenAI API เพื่อแปลและปรับระดับภาษาของชุดคำสั่งจำนวน 3,050 ชุดแบบอัตโนมัติ โดยกำหนดให้ครอบคลุมภาษาไทย 5 ระดับ ได้แก่ ระดับพิธีการ ทางการ กึ่งทางการ ไม่เป็นทางการ และกันเอง กระบวนการนี้ช่วยรักษาความหมายเดิมของคำสั่งขณะสร้างความหลากหลายด้านรูปแบบภาษา ลดความไม่สม่ำเสมอจากการแปลด้วยมนุษย์ และรองรับการประมวลผลข้อมูลขนาดใหญ่ เพื่อให้ชุดข้อมูลสะท้อนลักษณะการใช้งานจริงและเหมาะสมต่อการประเมินระบบในบริบทภาษาที่แตกต่างกัน
 \section{ระเบียบวิธีการโจมตี (Attack Methodology)}
 สภาพแวดล้อมการทดสอบ: ดำเนินการทดสอบซ้ำอย่างน้อย 5 รอบต่อกรณี เพื่อหาค่าเฉลี่ยอัตราความสำเร็จ (Average Success Rate)
-\begin{itemize}
-  \item Data Extraction Attack (DEA): ออกแบบคำสั่งเพื่อล่อลวงให้โมเดลเปิดเผยข้อมูลอีเมลหรือข้อมูลลับที่ถูกเก็บไว้ในหน่วยความจำ
-  \item Jailbreak Attack (JA): ใช้เทคนิค Persona Prompts หรือการสร้างสถานการณ์จำลองเพื่อหลีกเลี่ยงระบบความปลอดภัยของโมเดล
-\end{itemize}
+\subsection{Data Extraction Attack (DEA)} 
+ออกแบบคำสั่งเพื่อล่อลวงให้โมเดลเปิดเผยข้อมูลอีเมลหรือข้อมูลลับที่ถูกเก็บไว้ในหน่วยความจำ
+\subsection{Jailbreak Attack (JA)}
+ใช้เทคนิค Persona Prompts หรือการสร้างสถานการณ์จำลองเพื่อหลีกเลี่ยงระบบความปลอดภัยของโมเดล
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\linewidth]{"picture/System Flow/Attack System Flow.png"}
+  \caption{Attack System Flow}
+  \label{fig:attack_system_flow}
+\end{figure}
 
 \section{การออกแบบกลไกการป้องกัน (Defense Design)}
-\subsection{Input Scrubbing: (เอาเลขแบบนี้ หรือจุดๆดี)}
+\subsection{Input Scrubbing}
 พัฒนาระบบตรวจสอบคำสั่งขาเข้าด้วย Regular Expression (Regex) และ Named Entity Recognition (NER) เพื่อตรวจจับและปกปิดข้อมูลประเภท ชื่อ, อีเมล, เบอร์โทรศัพท์ ก่อนถึงตัวโมเดล
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\linewidth]{"picture/System Flow/Scrubbing System Flow.png"}
+  \caption{Scrubbing System Flow}
+  \label{fig:scrubbing_system_flow}
+\end{figure}
+
 \subsection{Defensive Prompting}
 ออกแบบ System Prompt จำนวน 12 รูปแบบ (แบ่งเป็นสำหรับ DEA 6 แบบ และ JA 6 แบบ) เพื่อกำหนดขอบเขตพฤติกรรมของโมเดลให้ปฏิเสธการตอบข้อมูลที่เป็นอันตราย
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\linewidth]{"picture/System Flow/Defensive Prompt System Flow.png"}
+  \caption{Defensive Prompt System Flow}
+  \label{fig:defensive_prompt_system_flow}
+\end{figure}
 
 \section{การพัฒนาระบบรันการทดสอบอัตโนมัติ (Automated Testing)}
 ทีมวิจัยได้พัฒนาเครื่องมือเพื่อเพิ่มประสิทธิภาพในการทดลอง ดังนี้:
