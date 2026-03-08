@@ -250,7 +250,7 @@
       โดย
       \par\vspace*{0.75in}\par
       {\@authorsize%
-      \begin{tabular}{@{}cl@{}}
+      \begin{tabular}{@{}p{2.8in}l@{}}
       \@authorsTH{& รหัส~}{\\}%
       \end{tabular}%
       }%
@@ -279,8 +279,8 @@
       \@titleEN
       \par\vspace*{1.5in}\par
       {\@authorsize%
-      \begin{tabular}{@{}cl@{}}
-      \@authorsEN{&}{\\}%
+      \begin{tabular}{@{}p{2.8in}l@{}}
+      \@authorsEN{& }{\\}%
       \end{tabular}%
       }%
       \vfill
@@ -381,7 +381,7 @@
     หัวข้อโครงงาน & \@titleTH \\
     & \@titleEN \\
     โดย &
-    \begin{tabular}[t]{@{}ll@{}}
+    \begin{tabular}[t]{@{}p{2.8in}l@{}}
       \@authorsTH{& รหัส~}{\\}
     \end{tabular}
     \\
@@ -399,7 +399,7 @@
   \begin{tabularx}{\linewidth}{@{}l@{\quad: }X@{}}
     Project Title & \@titleEN \\
     Name &
-    \begin{tabular}[t]{@{}ll@{}}
+    \begin{tabular}[t]{@{}p{2.8in}l@{}}
       \@authorsEN{& }{\\}
     \end{tabular}
     \\
