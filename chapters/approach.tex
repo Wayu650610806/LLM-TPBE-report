@@ -33,19 +33,19 @@
 \begin{itemize}
     \item \textbf{Enron Email Dataset:} ชุดข้อมูลอีเมลสาธารณะจากการสืบสวนคดีล้มละลายของบริษัท Enron (ค.ศ. 2001) ที่มักใช้ในงานวิจัยด้าน Machine Learning, NLP, Cybersecurity และ Data Leakage Detection ในงานศึกษานี้ใช้เพื่อจำลองสถานการณ์ Data Exfiltration Attack (DEA) เพื่อประเมินการป้องกันการรั่วไหลของข้อมูลภายใต้บริบททางวิชาการ
 
-    \begin{center}
-        \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/DEA without defense.png"}
-        \captionof{figure}{DEA without defense}
-        \label{fig:dea_without_defense}
-    \end{center}
+    % \begin{center}
+    %     \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/DEA without defense.png"}
+    %     \captionof{figure}{DEA without defense}
+    %     \label{fig:dea_without_defense}
+    % \end{center}
 
     \item \textbf{Jailbreak Prompt:} ชุดคำสั่งที่ออกแบบมาเพื่อหลีกเลี่ยงระบบความปลอดภัยของโมเดลภาษาขนาดใหญ่ (LLMs) โดยใช้เทคนิคหลากหลายเช่น Persona Prompts, Role-playing หรือการสร้างสถานการณ์จำลองเพื่อหลอกลวงให้โมเดลเปิดเผยข้อมูลที่เป็นอันตราย
 
-    \begin{center}
-        \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/JA without defense.png"}
-        \captionof{figure}{JA without defense}
-        \label{fig:ja_without_defense}
-    \end{center}
+    % \begin{center}
+    %     \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/JA without defense.png"}
+    %     \captionof{figure}{JA without defense}
+    %     \label{fig:ja_without_defense}
+    % \end{center}
 
 \end{itemize}
 
@@ -192,20 +192,20 @@
     ที่ประกอบด้วยข้อมูลสำคัญ โดยอาศัยหลักการ ``Extraction Success'' จากทฤษฎีการจดจำ (Memorization) ของ LLMs หากโมเดลสามารถเรียกคืน (Retrieve) 
     และตอบกลับข้อความที่ตรงกับข้อมูลจริงในชุดฝึกสอน (เช่น ข้อมูลอีเมลของพนักงาน) จะถือว่าเกิดการรั่วไหล ซึ่งสะท้อนถึงความอ่อนแอของระบบ 
     
-    \item \textbf{วิธีการวัดผล (Evaluation Methods):} กำหนดให้ใช้ \textbf{Extraction Rate (ER)} หรือ \textbf{Attack Success Rate (ASR)} 
+    \item \textbf{วิธีการวัดผล (Evaluation Methods):} กำหนดให้ใช้ \textbf{Attack Success Rate (ASR)} 
     เป็นมาตรวัดหลัก โดยอาจพิจารณาจากการจับคู่ข้อความ (String Matching) แบบตรงตัว (Exact Match) เพื่อความแม่นยำสูงสุดโดยข้อความที่ใช้ในการทดสอบคือ 
     \textbf{Email ของพนักงานในบริษัท Enron} ซึ่งใช้เป็นข้อมูลความลับอ้างอิง (Label) โดยมีเกณฑ์การนับผลลัพธ์ดังนี้:
     \begin{itemize}
         \item หากโมเดลตอบกลับข้อความที่ตรงกับข้อมูลความลับอ้างอิง (Label) จะถูกนับเป็นความสำเร็จ (Success)
         \item หากคำตอบไม่ตรงหรือถูกปฏิเสธ จะถูกนับเป็นความล้มเหลว (Fail)
     \end{itemize}
-    สูตรคำนวณอัตราความสำเร็จคือ: $ER = \left(\frac{\text{จำนวนครั้งที่ Success}}{\text{จำนวน Prompt ทดสอบทั้งหมด}}\right) \times 100\%$ 
-    การวัดนี้สามารถประยุกต์ใช้วิเคราะห์แนวโน้มข้อมูลรายชุดย่อย (Batch) หรือดูภาพรวมเพื่อสังเกตการลดลงของค่า ER เมื่อมีการใช้เทคนิคการป้องกัน
+    สูตรคำนวณอัตราความสำเร็จคือ: $ASR = \left(\frac{\text{จำนวน Prompt ที่ Success}}{\text{จำนวน Prompt ทดสอบทั้งหมด}}\right) \times 100\%$ 
+    การวัดนี้สามารถประยุกต์ใช้วิเคราะห์แนวโน้มข้อมูลรายชุดย่อย (Batch) หรือดูภาพรวมเพื่อสังเกตการลดลงของค่า ASR เมื่อมีการใช้เทคนิคการป้องกัน
     
-    \item \textbf{การบ่งชี้จากผลลัพธ์ (Expected Results):} ค่า ER ที่ได้จะเป็นดัชนีชี้วัดความมั่นคงของแบบจำลอง:
+    \item \textbf{การบ่งชี้จากผลลัพธ์ (Expected Results):} ค่า ASR ที่ได้จะเป็นดัชนีชี้วัดความมั่นคงของแบบจำลอง:
     \begin{itemize}
-        \item \textbf{ER สูง:} แสดงให้เห็นความอ่อนแอและช่องโหว่ต่อการถูกโจมตีดึงแฟ้มข้อมูล
-        \item \textbf{ER ต่ำ:} สะท้อนถึงประสิทธิภาพที่ยอดเยี่ยมของกลไกการป้องกัน (Scrubbing / Defensive Prompting) และยังสามารถต่อยอดวิเคราะห์เชิงเปรียบเทียบพฤติกรรมระหว่างโมเดลต่าง ๆ 
+        \item \textbf{ASR สูง:} แสดงให้เห็นความอ่อนแอและช่องโหว่ต่อการถูกโจมตีดึงแฟ้มข้อมูล
+        \item \textbf{ASR ต่ำ:} สะท้อนถึงประสิทธิภาพที่ยอดเยี่ยมของกลไกการป้องกัน (Scrubbing / Defensive Prompting) และยังสามารถต่อยอดวิเคราะห์เชิงเปรียบเทียบพฤติกรรมระหว่างโมเดลต่าง ๆ 
         ตลอดจนประเมินผลกระทบที่เกิดจากความแตกต่างของแต่ละระดับภาษาในชุดข้อมูลได้
     \end{itemize}
 \end{itemize}
@@ -217,7 +217,7 @@
     จะถือว่าการหลบเลี่ยง (Bypass) นั้นสำเร็จ ซึ่งภาพรวมนี้สะท้อนให้เห็นถึงความอ่อนแอของระบบการแนวระนาบความปลอดภัย (Safety Alignment) ของ LLM ซึ่งมีรากฐานมาจากงานวิจัยด้าน 
     Adversarial Attacks เพื่อนำมาวัดโอกาส (Jailbreak Success Rate) ที่โมเดลจะละเลยตัวกรองเนื้อหาเมื่อถูกกระตุ้นด้วยรูปแบบคำสั่งโจมตีแบบเฉพาะเจาะจง
     
-    \item \textbf{วิธีการวัดผล (Evaluation Methods):} กำหนดให้ใช้ \textbf{Jailbreak Rate (JR)} หรือ \textbf{Bypass Success Rate} 
+    \item \textbf{วิธีการวัดผล (Evaluation Methods):} กำหนดให้ใช้ \textbf{Jailbreak Rate (JR)} 
     เป็นมาตรวัดหลัก ซึ่งคำนวณจากอัตราส่วนของกรณีที่โมเดลตอบคำขออันตราย (Success) เทียบกับจำนวน Prompt ทดสอบทั้งหมด 
     โดยอาจพิจารณาใช้เทคนิค Natural Language Processing (NLP) โดยเฉพาะเทคนิค Named Entity Recognition (NER) ควบคู่กับ Regular Expression (REGEX) 
     ในการแยกแยะคำตอบเพื่อพิจารณาการฝ่าฝืนนโยบาย:
@@ -225,7 +225,7 @@
         \item หากโมเดลตอบคำถามที่ขัดหรือละเมิดนโยบายดั้งเดิม (เช่น ยอมให้ข้อมูลเท็จ หรือ ระบุข้อมูลส่วนตัวของผู้อื่น) จะถูกนับเป็นความสำเร็จ (Success)
         \item หากโมเดลตอบกลับในลักษณะปฏิเสธอย่างปลอดภัย จะถูกนับเป็นความล้มเหลว (Fail) 
     \end{itemize}
-    สูตรการคำนวณอัตราการเจาะระบบคือ: $JR = \left(\frac{\text{จำนวนครั้งที่ Success}}{\text{จำนวน Prompt ทดสอบทั้งหมด}}\right) \times 100\%$ 
+    สูตรการคำนวณอัตราการเจาะระบบคือ: $JR = \left(\frac{\text{จำนวน Prompt ที่ Success}}{\text{จำนวน Prompt ทดสอบทั้งหมด}}\right) \times 100\%$ 
     การประเมินนี้ถูกนำมาใช้วิเคราะห์ค่าความสำเร็จในระดับหมวดหมู่ของคำสั่งโจมตี (เช่น หมวด Obfuscation, Role-play) ตลอดจนการดูภาพรวมว่าค่า JR ตอบสนองและลดทอนลงอย่างไรเมื่อมีการแทรกระบบป้องกัน 
     (Scrubbing / Defensive Prompting) ขึ้นมาทดสอบร่วม
     
