@@ -63,11 +63,7 @@
 
 อย่างไรก็ตาม เป็นที่น่าสังเกตว่าโมเดล KIMI ยังคงมีอัตราหลุดของข้อมูลสูงกว่าโมเดลอื่นเล็กน้อย (0.32\%) โดยเฉพาะในบริบทการโจมตีด้วยภาษาอังกฤษ (0.47\%) ซึ่งอาจสะท้อนถึงความแตกต่างทางสถาปัตยกรรมของตัวโมเดลในการรักษาน้ำหนักของข้อจำกัด (Constraint Adherence) เมื่อเผชิญกับภาษาที่มีฐานข้อมูลการฝึกสอน (Training Data) หนาแน่นกว่า
 
-% \subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
-% เปรียบเทียบว่าระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 โมเดลใดมีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด และโมเดลใดมีแนวโน้มจะคายข้อมูลออกมาได้ง่ายที่สุด
-
-\subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
-ความสัมพันธ์ระหว่างความยาวของ Prompt และจำนวน Token ต่อความแม่นยำในการคายข้อมูล
+\clearpage
 
 \subsubsection{Token Range Analysis}
 
@@ -111,58 +107,61 @@
     \label{fig:tokencount-group}
 \end{figure}
 
-% TODO: เพิ่มข้อความอธิบายผลการวิเคราะห์ Token Range Analysis
-
 \clearpage
 
-\subsubsection{Word Count Analysis}
+จากผลการทดลองที่แสดงในภาพที่~\ref{fig:tokencount-group} ซึ่งแสดงกราฟ Attack Success Rate (ASR) ตามช่วงความยาว Token ทั้ง 5 ระดับภาษา พบว่าความยาวของ Prompt มีอิทธิพลอย่างมีนัยสำคัญต่ออัตราความสำเร็จของการโจมตีแบบ Data Extraction ต่อโมเดลภาษาขนาดใหญ่ทั้งสามตัว ได้แก่ Llama, Meta และ Kimi โดยสามารถสังเกตแนวโน้มที่สอดคล้องกันในทุกกราฟได้อย่างชัดเจน
+ในช่วงความยาว Token ที่สั้น (0--3,000 tokens) ทุกโมเดลแสดง ASR ที่ต่ำมาก โดยทั่วไปอยู่ที่ต่ำกว่า 5\% ซึ่งบ่งชี้ว่ากลไกความปลอดภัยของโมเดลยังคงทำงานได้อย่างมีประสิทธิภาพเมื่อ Prompt มีความยาวไม่มาก อย่างไรก็ตาม เมื่อความยาวของ Prompt เพิ่มขึ้นสู่ช่วง 3,000--6,000 tokens นั้น ASR เริ่มเพิ่มสูงขึ้นอย่างเห็นได้ชัดในทุกโมเดล และไปถึงจุดสูงสุดในช่วง 5,000--7,000 tokens โดย Meta มี ASR สูงสุดถึงประมาณ 45--50\% ที่ช่วง 6,000--7,000 tokens ขณะที่ Llama มักมี ASR สูงสุดที่ช่วง 5,000--6,000 tokens (สูงถึงประมาณ 36.7\%) และ Kimi มี ASR ใกล้เคียงกับ Meta ในหลายช่วง
+ปรากฏการณ์ที่ ASR เพิ่มขึ้นตามความยาวของ Prompt สามารถอธิบายได้ด้วยงานวิจัยหลายชิ้น ประการแรก Liu et al.\cite{liu2024lost} ในงานวิจัย \textit{Lost in the Middle: How Language Models Use Long Contexts} พบว่า LLM มีแนวโน้มที่จะให้ความสำคัญกับข้อมูลตอนต้นและตอนท้ายของ Context มากกว่าข้อมูลตรงกลาง (Primacy-Recency Bias) เมื่อ Prompt ยาวขึ้น System Prompt ที่สั่งให้โมเดลปกป้องข้อมูลอาจถูก ``ฝัง'' ไว้กลาง Context และถูกละเลย ทำให้การป้องกันอ่อนแอลง ประการที่สอง Hsieh et al.\cite{hsieh2024ruler} ในงานวิจัย \textit{Ruler: What's the Real Context Size of Your Long-Context Language Models?} ชี้ให้เห็นว่าเมื่อ Input ยาวขึ้น กลไก Self-Attention ของ Transformer ต้องกระจาย Attention Weights ไปยัง Token จำนวนมากขึ้น ทำให้เกิด Attention Dilution ส่งผลให้ Safety Instructions ได้รับ Attention น้อยลงและ Guard Rails ของโมเดลอ่อนแอลง
+ในส่วนของความแตกต่างระหว่างโมเดล พบว่า Meta มีความเปราะบางต่อการโจมตีมากที่สุดโดยเฉพาะในช่วง Token ยาว ขณะที่ Llama แสดงความทนทานที่ดีกว่าในช่วง Token สั้นถึงปานกลาง ความแตกต่างนี้สะท้อนถึงระดับ Safety Alignment ที่แตกต่างกันของแต่ละโมเดล
+โดยสรุป ผลการทดลองชี้ให้เห็นอย่างชัดเจนว่าความยาวของ Prompt เป็นปัจจัยสำคัญที่ส่งผลต่อความสำเร็จของการโจมตีแบบ Data Extraction โดยมี Sweet Spot อยู่ที่ช่วง 5,000--7,000 tokens ซึ่งกลไกความปลอดภัยของโมเดลอ่อนแอลงเนื่องจาก Attention Dilution และ Lost-in-the-Middle Effect
 
-\begin{figure}[h!]
-    \centering
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_ceremonial_500.png}
-        \subcaption{Ceremonial}
-        \label{fig:wordcount-ceremonial}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_formal_500.png}
-        \subcaption{Formal}
-        \label{fig:wordcount-formal}
-    \end{minipage}
-    \\[10pt]
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_semi_formal_500.png}
-        \subcaption{Semi-Formal}
-        \label{fig:wordcount-semi-formal}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_informal_500.png}
-        \subcaption{Informal}
-        \label{fig:wordcount-informal}
-    \end{minipage}
-    \\[10pt]
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_casual_500.png}
-        \subcaption{Casual}
-        \label{fig:wordcount-casual}
-    \end{minipage}
-    \caption{ASR by Word Count Analysis (Ceremonial, Formal, Semi-Formal, Informal, Casual)}
-    \label{fig:wordcount-group}
-\end{figure}
+% \clearpage
+
+% \subsubsection{Word Count Analysis}
+
+% \begin{figure}[h!]
+%     \centering
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_ceremonial_500.png}
+%         \subcaption{Ceremonial}
+%         \label{fig:wordcount-ceremonial}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_formal_500.png}
+%         \subcaption{Formal}
+%         \label{fig:wordcount-formal}
+%     \end{minipage}
+%     \\[10pt]
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_semi_formal_500.png}
+%         \subcaption{Semi-Formal}
+%         \label{fig:wordcount-semi-formal}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_informal_500.png}
+%         \subcaption{Informal}
+%         \label{fig:wordcount-informal}
+%     \end{minipage}
+%     \\[10pt]
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_casual_500.png}
+%         \subcaption{Casual}
+%         \label{fig:wordcount-casual}
+%     \end{minipage}
+%     \caption{ASR by Word Count Analysis (Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+%     \label{fig:wordcount-group}
+% \end{figure}
 
 % TODO: เพิ่มข้อความอธิบายผลการวิเคราะห์ Word Count Analysis
 
 \clearpage
-
-\subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
-เปรียบเทียบผลลัพธ์ระหว่างการไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
 
 \section{ผลการทดสอบการเจาะระบบเพื่อข้ามข้อจำกัด (Jailbreak Attack: JA)}
 วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวงด้วยการโจมตีแบบ Jailbreak Attack โดยแบ่งเป็น 3 กรณี ได้แก่ การไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
@@ -368,19 +367,20 @@ Latin และใช้กระบวนการ Tokenization แบบ subwo
 
 \clearpage
 
+\section{บทวิเคราะห์และข้อสรุปเชิงเทียบเคียง (Overall Discussion)}
+สรุปผลการประเมินประสิทธิภาพสูงสุด (Best Practice) ของโมเดลและกลไกการป้องกัน วิเคราะห์แนวโน้มการรั่วไหลของข้อมูลในบริบทภาษาไทยเมื่อเทียบกับมาตรฐานสากล
+
+\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดล}
+เปรียบเทียบว่าระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 โมเดลใดมีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด และโมเดลใดมีแนวโน้มจะคายข้อมูลออกมาได้ง่ายที่สุด
+
 \subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
 ตรวจสอบว่าระดับภาษาไทยที่มีความเป็นทางการสูงส่งผลต่อการปฏิเสธคำสั่งอันตรายของโมเดลอย่างไร
-
-\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน JA}
-เปรียบเทียบความแข็งแกร่งของ Safety Training ระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 เพื่อระบุว่าโมเดลใดมี "ปราการความปลอดภัย" ที่หนาแน่นที่สุดต่อการโจมตีเชิงจิตวิทยา (Persona/Social Engineering)
 
 \subsection{การวิเคราะห์เชิงปริมาณของ Token และทรัพยากรที่ใช้}
 ความสัมพันธ์ระหว่างความซับซ้อนของ Prompt โจมตีกับการเจาะระบบสำเร็จ
 
+\subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
+ความสัมพันธ์ระหว่างความยาวของ Prompt และจำนวน Token ต่อความแม่นยำในการคายข้อมูล
+
 \subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
 ประเมินว่าวิธีใดสามารถยับยั้งการตอบสนองต่อคำสั่งเจาะระบบได้ดีกว่ากัน
-
-\section{บทวิเคราะห์และข้อสรุปเชิงเทียบเคียง (Overall Discussion)}
-สรุปผลการประเมินประสิทธิภาพสูงสุด (Best Practice) ของโมเดลและกลไกการป้องกัน
-
-วิเคราะห์แนวโน้มการรั่วไหลของข้อมูลในบริบทภาษาไทยเมื่อเทียบกับมาตรฐานสากล
