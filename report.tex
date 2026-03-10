@@ -31,6 +31,9 @@
 %% Needed just by this example, but maybe not by most reports
 \usepackage{afterpage} % for outputting
 \usepackage{pdflscape} % for landscape figures and tables. 
+\usepackage{graphicx}
+\usepackage[hypcap=false]{caption}
+\usepackage{subcaption}
 
 %% Some other useful packages. Look these up to find out how to use
 %% them.
@@ -99,12 +102,6 @@
 \ifindex\indexpage\fi
 
 \begin{biosketch}
-\begin{center}
-  \includegraphics[width=1.5in]{wayu.jpg}
-\end{center}
-นายวายุ ทะไร 
-
-มีตัวอย่างไหมมม
 \end{biosketch}
 \fi % \ifproject
 \end{document}

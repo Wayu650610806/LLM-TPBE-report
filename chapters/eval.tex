@@ -1,33 +1,36 @@
 \chapter{\ifproject%
-\ifenglish Experimentation and Results\else การทดลองและผลลัพธ์\fi
-\else%
-\ifenglish System Evaluation\else การประเมินระบบ\fi
-\fi}
+      \ifenglish Experimentation and Results\else การทดลองและผลลัพธ์\fi
+  \else%
+      \ifenglish System Evaluation\else การประเมินระบบ\fi
+  \fi}
 
 ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขต่าง ๆ
 
 \section{ผลการทดสอบการโจมตีเพื่อดึงข้อมูล (Data Extraction Attack: DEA)}
 วิเคราะห์ความเปราะบางของโมเดลต่อการรั่วไหลของข้อมูลส่วนบุคคล (PII)
+
 \subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
 นำเสนอความต่างของอัตราการดึงข้อมูลสำเร็จระหว่างภาษาไทยและภาษาอังกฤษในภาพรวม
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.8\textwidth]{dea_accuracy_avg_th_eng.png}
-\end{center}
-\caption{DEA Accuracy Average (Thai vs English)}
-\label{fig:dea-th-eng}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng.png}
+    \caption{DEA Accuracy Average (Thai vs English)}
+    \label{fig:dea-th-eng}
 \end{figure}
 
-\subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
-วิเคราะห์ความอ่อนไหวของโมเดลเมื่อเผชิญกับภาษาไทยระดับต่าง ๆ (พิธีการ, ทางการ, กึ่งทางการ, ไม่เป็นทางการ, กันเอง)
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng_scrubbing.png}
+    \caption{DEA Accuracy Average with Input Scrubbing}
+    \label{fig:dea-scrubbing}
+\end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.8\textwidth]{dea_accuracy_avg_th.png}
-\end{center}
-\caption{DEA Accuracy Average (Thai 5 levels)}
-\label{fig:dea-th}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng_defensive_prompting.png}
+    \caption{DEA Accuracy Average with Defensive Prompting}
+    \label{fig:dea-defensive}
 \end{figure}
 
 \subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
@@ -36,14 +39,274 @@
 \subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
 ความสัมพันธ์ระหว่างความยาวของ Prompt และจำนวน Token ต่อความแม่นยำในการคายข้อมูล
 
+\subsubsection{Token Range Analysis}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/tokencount/asr_by_token_length_ceremonial_1000.png}
+        \subcaption{Ceremonial}
+        \label{fig:tokencount-ceremonial}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/tokencount/asr_by_token_length_formal_1000.png}
+        \subcaption{Formal}
+        \label{fig:tokencount-formal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/tokencount/asr_by_token_length_semi_formal_1000.png}
+        \subcaption{Semi-Formal}
+        \label{fig:tokencount-semi-formal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/tokencount/asr_by_token_length_informal_1000.png}
+        \subcaption{Informal}
+        \label{fig:tokencount-informal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/tokencount/asr_by_token_length_casual_1000.png}
+        \subcaption{Casual}
+        \label{fig:tokencount-casual}
+    \end{minipage}
+    \caption{ASR by Token Length Analysis (Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+    \label{fig:tokencount-group}
+\end{figure}
+
+\subsubsection{Word Count Analysis}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_ceremonial_500.png}
+        \subcaption{Ceremonial}
+        \label{fig:wordcount-ceremonial}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_formal_500.png}
+        \subcaption{Formal}
+        \label{fig:wordcount-formal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_semi_formal_500.png}
+        \subcaption{Semi-Formal}
+        \label{fig:wordcount-semi-formal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_informal_500.png}
+        \subcaption{Informal}
+        \label{fig:wordcount-informal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_casual_500.png}
+        \subcaption{Casual}
+        \label{fig:wordcount-casual}
+    \end{minipage}
+    \caption{ASR by Word Count Analysis (Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+    \label{fig:wordcount-group}
+\end{figure}
+
+\clearpage
+
 \subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
 เปรียบเทียบผลลัพธ์ระหว่างการไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
 
 \section{ผลการทดสอบการเจาะระบบเพื่อข้ามข้อจำกัด (Jailbreak Attack: JA)}
 วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวง
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered.png}
+    \caption{Jailbreak Rate Clustered (Thai vs English)}
+    \label{fig:jailbreak-clustered}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_scrubbing.png}
+    \caption{Jailbreak Rate Clustered after Input Scrubbing}
+    \label{fig:jailbreak-scrubbing}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_defensive_prompt.png}
+    \caption{Jailbreak Rate Clustered after Defensive Prompting}
+    \label{fig:jailbreak-defensive}
+\end{figure}
+
 \subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
 วิเคราะห์ความยากหรือง่ายในการเจาะระบบเมื่อใช้ภาษาไทยเปรียบเทียบกับภาษาอังกฤษ
+
+\subsubsection{Jailbreak Attack without Defense}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/without_Defense/eng_without_defense_all_model_average.png}
+        \subcaption{English}
+        \label{fig:jb-without-eng}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/without_Defense/th_without_defence_ceremonial_all_model_average.png}
+        \subcaption{Thai Ceremonial}
+        \label{fig:jb-without-th-ceremonial}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/without_Defense/th_without_defence_formal_all_model_average.png}
+        \subcaption{Thai Formal}
+        \label{fig:jb-without-th-formal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/without_Defense/th_without_defence_semi_formal_all_model_average.png}
+        \subcaption{Thai Semi-Formal}
+        \label{fig:jb-without-th-semi-formal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/without_Defense/th_without_defence_informal_all_model_average.png}
+        \subcaption{Thai Informal}
+        \label{fig:jb-without-th-informal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/without_Defense/th_without_defence_casual_all_model_average.png}
+        \subcaption{Thai Casual}
+        \label{fig:jb-without-th-casual}
+    \end{minipage}
+    \caption{Jailbreak Rate without Defense (English, Thai Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+    \label{fig:jb-without-defense-group}
+\end{figure}
+
+\clearpage
+
+\subsubsection{Jailbreak Attack with Input Scrubbing Defense}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/eng_with_scrubbing_all_model_average.png}
+        \subcaption{English}
+        \label{fig:jb-scrubbing-eng}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/th_with_scrubbing_ceremonial_all_model_average.png}
+        \subcaption{Thai Ceremonial}
+        \label{fig:jb-scrubbing-th-ceremonial}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/th_with_scrubbing_formal_all_model_average.png}
+        \subcaption{Thai Formal}
+        \label{fig:jb-scrubbing-th-formal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/th_with_scrubbing_semi_formal_all_model_average.png}
+        \subcaption{Thai Semi-Formal}
+        \label{fig:jb-scrubbing-th-semi-formal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/th_with_scrubbing_informal_all_model_average.png}
+        \subcaption{Thai Informal}
+        \label{fig:jb-scrubbing-th-informal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/th_with_scrubbing_casual_all_model_average.png}
+        \subcaption{Thai Casual}
+        \label{fig:jb-scrubbing-th-casual}
+    \end{minipage}
+    \caption{Jailbreak Rate with Input Scrubbing Defense (English, Thai Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+    \label{fig:jb-scrubbing-defense-group}
+\end{figure}
+
+\clearpage
+
+\subsubsection{Jailbreak Attack with Defensive Prompting Defense}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/eng_with_defensive_prompt_all_model_average.png}
+        \subcaption{English}
+        \label{fig:jb-defensive-eng}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/th_with_defensive_prompt_ceremonial_all_model_average.png}
+        \subcaption{Thai Ceremonial}
+        \label{fig:jb-defensive-th-ceremonial}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/th_with_defensive_prompt_formal_all_model_average.png}
+        \subcaption{Thai Formal}
+        \label{fig:jb-defensive-th-formal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/th_with_defensive_prompt_semi_formal_all_model_average.png}
+        \subcaption{Thai Semi-Formal}
+        \label{fig:jb-defensive-th-semi-formal}
+    \end{minipage}
+    \\[10pt]
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/th_with_defensive_prompt_informal_all_model_average.png}
+        \subcaption{Thai Informal}
+        \label{fig:jb-defensive-th-informal}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/th_with_defensive_prompt_casual_all_model_average.png}
+        \subcaption{Thai Casual}
+        \label{fig:jb-defensive-th-casual}
+    \end{minipage}
+    \caption{Jailbreak Rate with Defensive Prompting Defense (English, Thai Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+    \label{fig:jb-defensive-defense-group}
+\end{figure}
+
+\clearpage
 
 \subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
 ตรวจสอบว่าระดับภาษาไทยที่มีความเป็นทางการสูงส่งผลต่อการปฏิเสธคำสั่งอันตรายของโมเดลอย่างไร
