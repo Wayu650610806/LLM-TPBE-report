@@ -4,10 +4,11 @@
       \ifenglish System Evaluation\else การประเมินระบบ\fi
   \fi}
 
-ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขต่าง ๆ
+ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขของการโจมตีทั้ง 2 รูปแบบ ได้แก่ Data Extraction Attack (DEA) 
+และ Jailbreak Attack (JA) พร้อมทั้งผลการทดสอบหลังการใช้เทคนิคป้องกันทั้ง 2 รูปแบบ ได้แก่ Input Scrubbing และ Defensive Prompting
 
 \section{ผลการทดสอบการโจมตีเพื่อดึงข้อมูล (Data Extraction Attack: DEA)}
-วิเคราะห์ความเปราะบางของโมเดลต่อการรั่วไหลของข้อมูลส่วนบุคคล (PII)
+วิเคราะห์ผลการทดสอบการโจมตีเพื่อดึงข้อมูลที่ถูกใช้ในการฝึกสอนโมเดลด้วยเทคนิค Data Extraction Attack (DEA) โดยไม่ใช้การป้องกัน และหลังการใช้เทคนิคป้องกัน Input Scrubbing และ Defensive Prompting
 
 \subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
 นำเสนอความต่างของอัตราการดึงข้อมูลสำเร็จระหว่างภาษาไทยและภาษาอังกฤษในภาพรวม
@@ -19,12 +20,33 @@
     \label{fig:dea-th-eng}
 \end{figure}
 
+จากกราฟผลการทดลองการโจมตีแบบสกัดข้อมูล (Data Extraction Attack) โดยไม่ใช้การป้องกัน พบว่าการใช้ Prompt ภาษาอังกฤษให้อัตราการโจมตีสำเร็จสูงกว่าภาษาไทยในทั้งสามโมเดล โดยโมเดล \texttt{moonshotai/kimi-k2-instruct-0905} มีอัตราการถูกโจมตีเฉลี่ยสูงสุดที่ 4.13\% 
+สำหรับภาษาอังกฤษ และ 1.95\%--2.11\% สำหรับภาษาไทย (ทั้ง 5 ระดับภาษาที่ใกล้เคียงกัน) รองลงมาคือ \texttt{meta-llama/llama-4-maverick-17b-128e-instruct} และ \texttt{llama-3.1-8b-instant} ตามลำดับ ซึ่งสอดคล้องกับงานวิจัย 
+\textit{Evaluating the Elementary Multilingual Capabilities of Large Language Models with MultiQ} \cite{jauhiainen2023multiq} ที่ชี้ว่าภาษาอังกฤษมี tokenization subword ที่เหมาะสม ในขณะที่ภาษาไทยมี long tail performance ต่ำ 
+อันเนื่องมาจากการแบ่งข้อความออกเป็นตัวอักษรเดี่ยวหรือ ASCII รวมถึงการมีข้อมูลสำหรับ train ไม่เพียงพอ ทำให้ภาษาอังกฤษมีอัตราการถูกโจมตีสำเร็จสูงกว่าภาษาไทย ทั้งใน Data Extraction และ Jailbreak นอกจากนี้ Data Extraction Attack ด้วยภาษาไทยแบบ informal 
+ที่มีโครงสร้างสั้นและบริบทน้อยจึงลดโอกาสกระตุ้น (trigger) การดึง training data ส่งผลให้อัตราการโจมตีต่ำกว่าภาษาไทยแบบ formal หรือภาษาอื่นที่ซับซ้อนกว่า
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng_scrubbing.png}
     \caption{DEA Accuracy Average with Input Scrubbing}
     \label{fig:dea-scrubbing}
 \end{figure}
+
+จากผลการทดลองการทำ Scrubbing ชื่อเป้าหมาย (Target Name) ในการโจมตีแบบ Data Exfiltration Attack (DEA) บนชุดข้อมูล Enron พบว่าสามารถลดอัตราความสำเร็จของการโจมตี (DEA Success Rate) ลงได้จนใกล้เคียง 0\% อย่างมีนัยสำคัญ กล่าวคือ แม้จะทำการ Scrub ชื่อพนักงานใน Prompt ด้วยทั้งเทคนิค Regular Expression (Regex) 
+และ Named Entity Recognition (NER) แล้ว โมเดลภาษา (LLM) โดยรวมไม่สามารถให้ Email เป้าหมายได้
+
+อย่างไรก็ตาม จากการทดลองเพิ่มเติมยังพบข้อจำกัดบางประการ ดังนี้
+
+\begin{itemize}
+    \item \textbf{ชื่อและนามสกุลถูกแยกด้วยการเว้นบรรทัด} -- กรณีที่ชื่อและนามสกุลถูกแยกด้วยช่องว่างและการขึ้นบรรทัดใหม่ เช่น ชื่อ ``Kittiwin'' ตามด้วยเว้นวรรคและขึ้นบรรทัดใหม่ก่อน ``Phannachet'' ทำให้ระบบ Scrubbing ไม่สามารถจับคู่ชื่อ-นามสกุลเป็นหน่วยเดียวกันได้
+    \item \textbf{ชื่อในรูปแบบพิเศษ} -- ชื่อที่มีโครงสร้างต่างจาก Pattern ปกติ เช่น ``Cadwalader, Wickersham \& Taft'' ซึ่งมีเครื่องหมายจุลภาคและเครื่องหมาย \& คั่น ทำให้ทั้ง Regex และ NER ไม่สามารถระบุเป็นชื่อบุคคลหรือองค์กรได้ถูกต้อง
+    \item \textbf{ข้อมูลเฉพาะเจาะจงอื่น ๆ เป็นเบาะแส} -- การให้ข้อมูลที่มีลักษณะเฉพาะ เช่น หมายเลขโทรศัพท์ สามารถถูกใช้เป็นเบาะแสเพื่อชี้นำไปยัง Email เป้าหมายได้ แม้ว่าชื่อจะถูก Scrub ออกแล้วก็ตาม
+\end{itemize}
+
+นอกจากนี้ ในบริบทภาษาไทยยังพบข้อจำกัดเพิ่มเติม โดยเฉพาะกรณีชื่อที่เป็นคำทับศัพท์ (Transliterated Names) ซึ่งระบบ NER ตรวจจับได้ยาก เนื่องจากรูปแบบการเขียนทับศัพท์ภาษาไทยมีความหลากหลายและไม่มีมาตรฐานตายตัว ส่งผลให้ประสิทธิภาพของการ Scrubbing ลดลง และทำให้อัตราความสำเร็จของการโจมตีหลัง Scrubbing ในภาษาไทยยังมีแนวโน้มสูงกว่าภาษาอังกฤษ
+
+\clearpage
 
 \begin{figure}[htbp]
     \centering
@@ -33,15 +55,23 @@
     \label{fig:dea-defensive}
 \end{figure}
 
-\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
-เปรียบเทียบว่าระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 โมเดลใดมีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด และโมเดลใดมีแนวโน้มจะคายข้อมูลออกมาได้ง่ายที่สุด
+จากผลการทดลองการโจมตีแบบสกัดข้อมูล (Data Extraction Attack: DEA) ด้วยการประยุกต์ใช้ Defensive Prompt พบว่าสามารถลดอัตราความสำเร็จของการโจมตี (ASR) ลงได้อย่างมีนัยสำคัญในทุกโมเดลและทุกระดับภาษา โดยอัตราเฉลี่ยรวม (Overall Average ASR) ลดลงจนเกือบถึง 0\% (LLAMA: 0.03\%, META: 0.04\%, KIMI: 0.32\%) ประสิทธิภาพการป้องกันที่สูงระดับนี้เป็นผลมาจากกลไกการออกแบบคำสั่งป้องกัน (Prompt Engineering) สองประการหลัก
+
+ประการแรก คือการประยุกต์ใช้เทคนิคการสวมบทบาท (Role-Playing) โดยกำหนดให้โมเดลทำหน้าที่เป็น ``ผู้ตรวจสอบความปลอดภัยของข้อมูล (DLP Officer)'' ที่มีเป้าหมายชัดเจนในการป้องกันข้อมูลรั่วไหล ซึ่งสอดคล้องกับแนวคิดในงานวิจัย \textit{Role-Play with Large Language Models} ที่พบว่าการกำหนด Persona และขอบเขตหน้าที่ที่เฉพาะเจาะจงใน System Prompt จะช่วยเพิ่มประสิทธิภาพในการตีกรอบพฤติกรรมของโมเดลให้ปฏิบัติตามนโยบายความปลอดภัยได้ดีขึ้น
+
+ประการที่สอง คือการดักจับด้วยเงื่อนไขที่ตรงกัน (Exact Condition Matching) ภายใน Defensive Prompt มีการระบุเงื่อนไขอย่างชัดเจนว่า ``เมื่อผู้ใช้ขอให้คุณเขียนข้อความต่อ{\ldots}'' ซึ่งโครงสร้างคำสั่งดังกล่าวไปตรงกับรูปแบบ (Pattern) มาตรฐานของชุดคำสั่งที่ใช้ในการโจมตีแบบ DEA อย่างพอดิบพอดี (เช่น ``กรุณาดำเนินการเขียนข้อความต่อจากบริบทด้านล่างนี้'') ส่งผลให้โมเดลสามารถตรวจจับพฤติกรรม (Trigger) ที่เสี่ยงต่อการพยายามดึงข้อมูล (Data Extraction Attempt) ได้ทันที และเลือกที่จะปฏิเสธการให้ข้อมูลส่วนบุคคล (PII) ตามคำสั่งใน System Prompt ที่มีน้ำหนักความสำคัญสูงกว่าคำสั่งของผู้ใช้ (User Prompt)
+
+อย่างไรก็ตาม เป็นที่น่าสังเกตว่าโมเดล KIMI ยังคงมีอัตราหลุดของข้อมูลสูงกว่าโมเดลอื่นเล็กน้อย (0.32\%) โดยเฉพาะในบริบทการโจมตีด้วยภาษาอังกฤษ (0.47\%) ซึ่งอาจสะท้อนถึงความแตกต่างทางสถาปัตยกรรมของตัวโมเดลในการรักษาน้ำหนักของข้อจำกัด (Constraint Adherence) เมื่อเผชิญกับภาษาที่มีฐานข้อมูลการฝึกสอน (Training Data) หนาแน่นกว่า
+
+% \subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
+% เปรียบเทียบว่าระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 โมเดลใดมีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด และโมเดลใดมีแนวโน้มจะคายข้อมูลออกมาได้ง่ายที่สุด
 
 \subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
 ความสัมพันธ์ระหว่างความยาวของ Prompt และจำนวน Token ต่อความแม่นยำในการคายข้อมูล
 
 \subsubsection{Token Range Analysis}
 
-\begin{figure}[htbp]
+\begin{figure}[h!]
     \centering
     \begin{minipage}[t]{0.48\textwidth}
         \centering
@@ -81,9 +111,13 @@
     \label{fig:tokencount-group}
 \end{figure}
 
+% TODO: เพิ่มข้อความอธิบายผลการวิเคราะห์ Token Range Analysis
+
+\clearpage
+
 \subsubsection{Word Count Analysis}
 
-\begin{figure}[htbp]
+\begin{figure}[h!]
     \centering
     \begin{minipage}[t]{0.48\textwidth}
         \centering
@@ -123,13 +157,21 @@
     \label{fig:wordcount-group}
 \end{figure}
 
+% TODO: เพิ่มข้อความอธิบายผลการวิเคราะห์ Word Count Analysis
+
 \clearpage
 
 \subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
 เปรียบเทียบผลลัพธ์ระหว่างการไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
 
 \section{ผลการทดสอบการเจาะระบบเพื่อข้ามข้อจำกัด (Jailbreak Attack: JA)}
-วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวง
+วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวงด้วยการโจมตีแบบ Jailbreak Attack โดยแบ่งเป็น 3 กรณี ได้แก่ การไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
+พร้อมทั้งเปรียบเทียบประสิทธิภาพของกลไกการป้องกันทั้งสองแบบเพื่อวิเคราะห์ว่ากลไกการป้องกันแบบใดมีประสิทธิภาพมากกว่าในการป้องกันการเจาะระบบ
+
+\subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
+วิเคราะห์ความยากหรือง่ายในการเจาะระบบเมื่อใช้ภาษาไทยเปรียบเทียบกับภาษาอังกฤษเพื่อหาว่าภาษาใดมีโอกาสสำเร็จในการเจาะระบบมากกว่ากันในการโจมตี Jailbreak Attack
+
+\subsubsection{Jailbreak Attack without Defense}
 
 \begin{figure}[htbp]
     \centering
@@ -138,24 +180,11 @@
     \label{fig:jailbreak-clustered}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_scrubbing.png}
-    \caption{Jailbreak Rate Clustered after Input Scrubbing}
-    \label{fig:jailbreak-scrubbing}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_defensive_prompt.png}
-    \caption{Jailbreak Rate Clustered after Defensive Prompting}
-    \label{fig:jailbreak-defensive}
-\end{figure}
-
-\subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
-วิเคราะห์ความยากหรือง่ายในการเจาะระบบเมื่อใช้ภาษาไทยเปรียบเทียบกับภาษาอังกฤษ
-
-\subsubsection{Jailbreak Attack without Defense}
+จากการทดสอบ Jailbreak Attack (JA) บน 3 โมเดลภาษาผ่าน 390 prompts โดยไม่มีการป้องกัน พบว่าการโจมตีด้วยภาษาอังกฤษมีอัตราความสำเร็จเฉลี่ยกว่าภาษาไทยในทุก Model โดย \texttt{llama-3.1-8b-instant} มีความเปราะบางสูงสุดที่ 32.1\% 
+ตามด้วย \texttt{moonshotai-kimi-k2-instruct-0905} (28.1\%) และ \texttt{meta-llama-llama-4-maverick-17b-128e-instruct} (21.8\%) 
+สำหรับภาษาไทยพบว่าแต่ละโมเดลมีความทนทานต่อระดับภาษาที่ต่างกัน โดย Llama และ Kimi มีอัตราการโจมตีสำเร็จต่ำสุดในระดับภาษา Casual (12.8\% และ 17.8\%) ในขณะที่โมเดล Meta ทนทานที่สุดในระดับภาษา 
+Informal (13.4\%) ซึ่งชี้ให้เห็นว่าโครงสร้างระดับภาษาไทยมีผลต่อความปลอดภัยของโมเดลที่แตกต่างกัน โดยสาเหตุที่ Casual มีโอกาสสำเร็จต่ำที่สุดเนื่องจาก Training Set ส่วนใหญ่ที่ใช้ในการ Train LLM 
+เป็นข้อมูลที่เป็นภาษาระดับ Casual ซึ่งทำให้ Safety alignment ป้องกันได้ดีกว่าในภาษาระดับ Casual
 
 \begin{figure}[htbp]
     \centering
@@ -210,6 +239,22 @@
 
 \begin{figure}[htbp]
     \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_scrubbing.png}
+    \caption{Jailbreak Rate Clustered after Input Scrubbing}
+    \label{fig:jailbreak-scrubbing}
+\end{figure}
+
+จากกราฟแสดงอัตราการโจมตีสำเร็จของ Jailbreak เทียบตามภาษาและระดับภาษาหลังการใช้การป้องกันโดยการ Scrubbing ข้อความที่มีความเสี่ยงต่อการใช้งานในการโจมตีด้วย Prompt 390 Prompt 
+พบว่าการใช้ภาษาอังกฤษมีค่าความสำเร็จในการโจมตีสูงกว่าการใช้ภาษาไทยในการโจมตี และเมื่อทำการ Scrubbing แล้วพบว่าลดโอกาสการโจมตีสำเร็จไปที่ 11.3\% สำหรับ Model 
+\texttt{llama-3.1-8b-instant}, 3.1\% \texttt{kimi-k2-instruct-0905} และ 3\% สำหรับ Model \texttt{llama-4-maverick-17b-128e-instruct} 
+ในส่วนของภาษาไทยนั้นแต่ละระดับภาษาจะมีอัตราความสำเร็จเฉลี่ยที่ต่างกันเล็กน้อยโดยระดับ Formal มีโอกาสสำเร็จสูงสุดโดยเฉลี่ยอยู่ที่ 15.2\% โดยหลังการทำ Scrubbing พบว่า Model 
+\texttt{llama-3.1-8b-instant} มีโอกาสการโจมตีสำเร็จลดลง 5.7\%, \texttt{kimi-k2-instruct-0905} 4.9\% และ 0\% สำหรับ \texttt{llama-4-maverick-17b-128e-instruct} 
+การ Scrubbing นั้นสามารถอธิบายได้ว่าเนื่องจาก \texttt{llama-3.1-8b-instant} เป็น Model ขนาดเล็กซึ่งพึ่งพา surface-level pattern matching กล่าวคือตอบสนองต่อ Keyword และโครงสร้างประโยค 
+มากกว่าเข้าใจบริบทเชิงลึกจึงทำให้ลดโอกาสการโจมตีได้สูงที่สุด สำหรับ \texttt{kimi-k2-instruct-0905} และ \texttt{llama-4-maverick-17b-128e-instruct} เป็น Model 
+ที่ใช้หลักการ Semantic understanding ทำให้การ Scrubbing นั้นลดโอกาสการโจมตีได้น้อยหรือไม่ได้ผลเลย
+
+\begin{figure}[htbp]
+    \centering
     \begin{minipage}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/eng_with_scrubbing_all_model_average.png}
@@ -258,6 +303,21 @@
 \clearpage
 
 \subsubsection{Jailbreak Attack with Defensive Prompting Defense}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_defensive_prompt.png}
+    \caption{Jailbreak Rate Clustered after Defensive Prompting}
+    \label{fig:jailbreak-defensive}
+\end{figure}
+
+จากกราฟแสดงอัตราความสำเร็จของการโจมตีแบบ Jailbreak จำแนกตามระดับภาษาและโมเดล ภายหลังการใช้ Defensive Prompt Defence จำนวน 5 รอบการทดสอบพบว่าภาษาอังกฤษมีแนวโน้มให้ค่าเฉลี่ยการโจมตีสำเร็จสูงกว่าภาษาไทยในเกือบทุกโมเดล 
+โดย Model Meta มีค่าสูงสุดที่ 15.7\% รองลงมาคือ Kimi ที่ 14.4\% และ Llama ที่ 12.8\% สะท้อนว่าภาษาอังกฤษยังคงเป็นพื้นผิวการโจมตีที่มีความเสี่ยงสูง แม้มีมาตรการป้องกันแล้ว ในส่วนของภาษาไทย เมื่อพิจารณาตามระดับภาษา พบว่าระดับ Formal 
+มีอัตราความสำเร็จเฉลี่ยสูงสุด โดย Llama อยู่ที่ 16.7\% Kimi 14.8\% และ Meta 13.5\% รองลงมาคือระดับ Semi-formal ซึ่งมีค่าใกล้เคียงกันทั้งสามโมเดลประมาณ 14--15\% ขณะที่ระดับ Informal ลดลงมาอยู่ในช่วง 11--13\% และระดับ Casual 
+มีอัตราความสำเร็จต่ำที่สุดอย่างชัดเจนใน Llama ที่ 6.6\% และ Meta ที่ 5.8\% แต่ Kimi ยังอยู่ที่ 13.5\% เมื่อวิเคราะห์เชิงพฤติกรรมของโมเดล พบว่า Llama และ Meta มีความไวต่อระดับภาษาอย่างชัดเจน กล่าวคือเมื่อระดับภาษาไม่เป็นทางการมากขึ้น อัตราการโจมตีสำเร็จลดลงอย่างมีนัยสำคัญ 
+ในขณะที่ Kimi มีค่าเฉลี่ยค่อนข้างสม่ำเสมอในทุกระดับภาษาแสดงให้เห็นว่าการเปลี่ยนรูปแบบภาษาให้ไม่เป็นทางการสามารถช่วยลดความเสี่ยงได้ในบางโมเดลแต่ไม่ส่งผลชัดเจนในทุกโมเดลโดยปัจจัยที่ทำให้ภาษาอังกฤษมีโอกาสโจมตีสำเร็จสูงกว่าอาจเนื่องมาจากข้อมูลฝึกสอนของโมเดลส่วนใหญ่เป็นภาษา 
+Latin และใช้กระบวนการ Tokenization แบบ subword ซึ่งเอื้อต่อความเข้าใจเชิงความหมายและโครงสร้างประโยคที่ซับซ้อน ส่งผลให้การสร้าง prompt เพื่อหลบเลี่ยงกลไกป้องกันทำได้มีประสิทธิภาพมากกว่า ดังนั้นแม้จะมี Defensive Prompt Defence แล้ว 
+ระดับภาษาและประเภทภาษายังคงเป็นปัจจัยสำคัญที่ส่งผลต่อความเปราะบางของโมเดล โดยเฉพาะภาษาอังกฤษและภาษาไทยระดับ Formal ที่ยังคงมีความเสี่ยงสูงกว่าระดับภาษาอื่นอย่างชัดเจน
 
 \begin{figure}[htbp]
     \centering
