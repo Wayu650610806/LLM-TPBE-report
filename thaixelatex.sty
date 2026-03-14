@@ -37,10 +37,30 @@
 \newfontfamily\thaifonttt[
   % Script=Thai,
   Scale=MatchLowercase,
+  Extension=.otf,
+  ItalicFont=*-Oblique,
+  BoldFont=*-Bold,
+  BoldItalicFont=*-BoldOblique,
 ]{TlwgTypist}
 % ]{Arundina Sans Mono}  % doesn't work for now
-\setmainfont[Scale=MatchLowercase]{TeX Gyre Termes}
-\setsansfont[Scale=MatchLowercase]{TeX Gyre Heros}
+\setmainfont[
+  Scale=MatchLowercase,
+  Extension=.otf,
+  UprightFont=*-regular,
+  BoldFont=*-bold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-bolditalic,
+]{texgyretermes}
+
+\setsansfont[
+  Scale=MatchLowercase,
+  Extension=.otf,
+  UprightFont=*-regular,
+  BoldFont=*-bold,
+  ItalicFont=*-italic,
+  BoldItalicFont=*-bolditalic,
+]{texgyreheros}
+
 \setmonofont[
   Mapping=,
   Scale=MatchLowercase,
@@ -55,10 +75,7 @@
 %% math setup
 \RequirePackage{amsmath}
 \RequirePackage{unicode-math}
-\setmathfont{TeX Gyre Termes Math}
-\setmathfontface\mathrm{TeX Gyre Termes}
-\setmathfontface\mathbf{TeX Gyre Termes Bold}
-\setmathfontface\mathit{TeX Gyre Termes Italic}
+\setmathfont{texgyretermes-math.otf}
 
 \def\th@fam{0}
 \let\th@thaifont=\thaifont
