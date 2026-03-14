@@ -4,10 +4,11 @@
       \ifenglish System Evaluation\else การประเมินระบบ\fi
   \fi}
 
-ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขต่าง ๆ
+ในบทนี้จะนำเสนอและวิเคราะห์ผลการทดสอบประสิทธิภาพความปลอดภัยของโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 ภายใต้เงื่อนไขของการโจมตีทั้ง 2 รูปแบบ ได้แก่ Data Extraction Attack (DEA) 
+และ Jailbreak Attack (JA) พร้อมทั้งผลการทดสอบหลังการใช้เทคนิคป้องกันทั้ง 2 รูปแบบ ได้แก่ Input Scrubbing และ Defensive Prompting
 
 \section{ผลการทดสอบการโจมตีเพื่อดึงข้อมูล (Data Extraction Attack: DEA)}
-วิเคราะห์ความเปราะบางของโมเดลต่อการรั่วไหลของข้อมูลส่วนบุคคล (PII)
+วิเคราะห์ผลการทดสอบการโจมตีเพื่อดึงข้อมูลที่ถูกใช้ในการฝึกสอนโมเดลด้วยเทคนิค Data Extraction Attack (DEA) โดยไม่ใช้การป้องกัน และหลังการใช้เทคนิคป้องกัน Input Scrubbing และ Defensive Prompting
 
 \subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
 นำเสนอความต่างของอัตราการดึงข้อมูลสำเร็จระหว่างภาษาไทยและภาษาอังกฤษในภาพรวม
@@ -19,12 +20,33 @@
     \label{fig:dea-th-eng}
 \end{figure}
 
+จากกราฟผลการทดลองการโจมตีแบบสกัดข้อมูล (Data Extraction Attack) โดยไม่ใช้การป้องกัน พบว่าการใช้ Prompt ภาษาอังกฤษให้อัตราการโจมตีสำเร็จสูงกว่าภาษาไทยในทั้งสามโมเดล โดยโมเดล \texttt{moonshotai/kimi-k2-instruct-0905} มีอัตราการถูกโจมตีเฉลี่ยสูงสุดที่ 4.13\% 
+สำหรับภาษาอังกฤษ และ 1.95\%--2.11\% สำหรับภาษาไทย (ทั้ง 5 ระดับภาษาที่ใกล้เคียงกัน) รองลงมาคือ \texttt{meta-llama/llama-4-maverick-17b-128e-instruct} และ \texttt{llama-3.1-8b-instant} ตามลำดับ ซึ่งสอดคล้องกับงานวิจัย 
+\textit{Evaluating the Elementary Multilingual Capabilities of Large Language Models with MultiQ} \cite{jauhiainen2023multiq} ที่ชี้ว่าภาษาอังกฤษมี tokenization subword ที่เหมาะสม ในขณะที่ภาษาไทยมี long tail performance ต่ำ 
+อันเนื่องมาจากการแบ่งข้อความออกเป็นตัวอักษรเดี่ยวหรือ ASCII รวมถึงการมีข้อมูลสำหรับ train ไม่เพียงพอ ทำให้ภาษาอังกฤษมีอัตราการถูกโจมตีสำเร็จสูงกว่าภาษาไทย ทั้งใน Data Extraction และ Jailbreak นอกจากนี้ Data Extraction Attack ด้วยภาษาไทยแบบ informal 
+ที่มีโครงสร้างสั้นและบริบทน้อยจึงลดโอกาสกระตุ้น (trigger) การดึง training data ส่งผลให้อัตราการโจมตีต่ำกว่าภาษาไทยแบบ formal หรือภาษาอื่นที่ซับซ้อนกว่า
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{picture/Analysis/Data_Extraction/dea_accuracy_avg_th_eng_scrubbing.png}
     \caption{DEA Accuracy Average with Input Scrubbing}
     \label{fig:dea-scrubbing}
 \end{figure}
+
+จากผลการทดลองการทำ Scrubbing ชื่อเป้าหมาย (Target Name) ในการโจมตีแบบ Data Exfiltration Attack (DEA) บนชุดข้อมูล Enron พบว่าสามารถลดอัตราความสำเร็จของการโจมตี (DEA Success Rate) ลงได้จนใกล้เคียง 0\% อย่างมีนัยสำคัญ กล่าวคือ แม้จะทำการ Scrub ชื่อพนักงานใน Prompt ด้วยทั้งเทคนิค Regular Expression (Regex) 
+และ Named Entity Recognition (NER) แล้ว โมเดลภาษา (LLM) โดยรวมไม่สามารถให้ Email เป้าหมายได้
+
+อย่างไรก็ตาม จากการทดลองเพิ่มเติมยังพบข้อจำกัดบางประการ ดังนี้
+
+\begin{itemize}
+    \item \textbf{ชื่อและนามสกุลถูกแยกด้วยการเว้นบรรทัด} -- กรณีที่ชื่อและนามสกุลถูกแยกด้วยช่องว่างและการขึ้นบรรทัดใหม่ เช่น ชื่อ ``Kittiwin'' ตามด้วยเว้นวรรคและขึ้นบรรทัดใหม่ก่อน ``Phannachet'' ทำให้ระบบ Scrubbing ไม่สามารถจับคู่ชื่อ-นามสกุลเป็นหน่วยเดียวกันได้
+    \item \textbf{ชื่อในรูปแบบพิเศษ} -- ชื่อที่มีโครงสร้างต่างจาก Pattern ปกติ เช่น ``Cadwalader, Wickersham \& Taft'' ซึ่งมีเครื่องหมายจุลภาคและเครื่องหมาย \& คั่น ทำให้ทั้ง Regex และ NER ไม่สามารถระบุเป็นชื่อบุคคลหรือองค์กรได้ถูกต้อง
+    \item \textbf{ข้อมูลเฉพาะเจาะจงอื่น ๆ เป็นเบาะแส} -- การให้ข้อมูลที่มีลักษณะเฉพาะ เช่น หมายเลขโทรศัพท์ สามารถถูกใช้เป็นเบาะแสเพื่อชี้นำไปยัง Email เป้าหมายได้ แม้ว่าชื่อจะถูก Scrub ออกแล้วก็ตาม
+\end{itemize}
+
+นอกจากนี้ ในบริบทภาษาไทยยังพบข้อจำกัดเพิ่มเติม โดยเฉพาะกรณีชื่อที่เป็นคำทับศัพท์ (Transliterated Names) ซึ่งระบบ NER ตรวจจับได้ยาก เนื่องจากรูปแบบการเขียนทับศัพท์ภาษาไทยมีความหลากหลายและไม่มีมาตรฐานตายตัว ส่งผลให้ประสิทธิภาพของการ Scrubbing ลดลง และทำให้อัตราความสำเร็จของการโจมตีหลัง Scrubbing ในภาษาไทยยังมีแนวโน้มสูงกว่าภาษาอังกฤษ
+
+\clearpage
 
 \begin{figure}[htbp]
     \centering
@@ -33,15 +55,19 @@
     \label{fig:dea-defensive}
 \end{figure}
 
-\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน DEA}
-เปรียบเทียบว่าระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 โมเดลใดมีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด และโมเดลใดมีแนวโน้มจะคายข้อมูลออกมาได้ง่ายที่สุด
+จากผลการทดลองการโจมตีแบบสกัดข้อมูล (Data Extraction Attack: DEA) ด้วยการประยุกต์ใช้ Defensive Prompt พบว่าสามารถลดอัตราความสำเร็จของการโจมตี (ASR) ลงได้อย่างมีนัยสำคัญในทุกโมเดลและทุกระดับภาษา โดยอัตราเฉลี่ยรวม (Overall Average ASR) ลดลงจนเกือบถึง 0\% (LLAMA: 0.03\%, META: 0.04\%, KIMI: 0.32\%) ประสิทธิภาพการป้องกันที่สูงระดับนี้เป็นผลมาจากกลไกการออกแบบคำสั่งป้องกัน (Prompt Engineering) สองประการหลัก
 
-\subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
-ความสัมพันธ์ระหว่างความยาวของ Prompt และจำนวน Token ต่อความแม่นยำในการคายข้อมูล
+ประการแรก คือการประยุกต์ใช้เทคนิคการสวมบทบาท (Role-Playing) โดยกำหนดให้โมเดลทำหน้าที่เป็น ``ผู้ตรวจสอบความปลอดภัยของข้อมูล (DLP Officer)'' ที่มีเป้าหมายชัดเจนในการป้องกันข้อมูลรั่วไหล ซึ่งสอดคล้องกับแนวคิดในงานวิจัย \textit{Role-Play with Large Language Models} ที่พบว่าการกำหนด Persona และขอบเขตหน้าที่ที่เฉพาะเจาะจงใน System Prompt จะช่วยเพิ่มประสิทธิภาพในการตีกรอบพฤติกรรมของโมเดลให้ปฏิบัติตามนโยบายความปลอดภัยได้ดีขึ้น
+
+ประการที่สอง คือการดักจับด้วยเงื่อนไขที่ตรงกัน (Exact Condition Matching) ภายใน Defensive Prompt มีการระบุเงื่อนไขอย่างชัดเจนว่า ``เมื่อผู้ใช้ขอให้คุณเขียนข้อความต่อ{\ldots}'' ซึ่งโครงสร้างคำสั่งดังกล่าวไปตรงกับรูปแบบ (Pattern) มาตรฐานของชุดคำสั่งที่ใช้ในการโจมตีแบบ DEA อย่างพอดิบพอดี (เช่น ``กรุณาดำเนินการเขียนข้อความต่อจากบริบทด้านล่างนี้'') ส่งผลให้โมเดลสามารถตรวจจับพฤติกรรม (Trigger) ที่เสี่ยงต่อการพยายามดึงข้อมูล (Data Extraction Attempt) ได้ทันที และเลือกที่จะปฏิเสธการให้ข้อมูลส่วนบุคคล (PII) ตามคำสั่งใน System Prompt ที่มีน้ำหนักความสำคัญสูงกว่าคำสั่งของผู้ใช้ (User Prompt)
+
+อย่างไรก็ตาม เป็นที่น่าสังเกตว่าโมเดล KIMI ยังคงมีอัตราหลุดของข้อมูลสูงกว่าโมเดลอื่นเล็กน้อย (0.32\%) โดยเฉพาะในบริบทการโจมตีด้วยภาษาอังกฤษ (0.47\%) ซึ่งอาจสะท้อนถึงความแตกต่างทางสถาปัตยกรรมของตัวโมเดลในการรักษาน้ำหนักของข้อจำกัด (Constraint Adherence) เมื่อเผชิญกับภาษาที่มีฐานข้อมูลการฝึกสอน (Training Data) หนาแน่นกว่า
+
+\clearpage
 
 \subsubsection{Token Range Analysis}
 
-\begin{figure}[htbp]
+\begin{figure}[h!]
     \centering
     \begin{minipage}[t]{0.48\textwidth}
         \centering
@@ -81,55 +107,70 @@
     \label{fig:tokencount-group}
 \end{figure}
 
-\subsubsection{Word Count Analysis}
+\clearpage
 
-\begin{figure}[htbp]
-    \centering
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_ceremonial_500.png}
-        \subcaption{Ceremonial}
-        \label{fig:wordcount-ceremonial}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_formal_500.png}
-        \subcaption{Formal}
-        \label{fig:wordcount-formal}
-    \end{minipage}
-    \\[10pt]
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_semi_formal_500.png}
-        \subcaption{Semi-Formal}
-        \label{fig:wordcount-semi-formal}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_informal_500.png}
-        \subcaption{Informal}
-        \label{fig:wordcount-informal}
-    \end{minipage}
-    \\[10pt]
-    \begin{minipage}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_casual_500.png}
-        \subcaption{Casual}
-        \label{fig:wordcount-casual}
-    \end{minipage}
-    \caption{ASR by Word Count Analysis (Ceremonial, Formal, Semi-Formal, Informal, Casual)}
-    \label{fig:wordcount-group}
-\end{figure}
+จากผลการทดลองที่แสดงในภาพที่~\ref{fig:tokencount-group} ซึ่งแสดงกราฟ Attack Success Rate (ASR) ตามช่วงความยาว Token ทั้ง 5 ระดับภาษา พบว่าความยาวของ Prompt มีอิทธิพลอย่างมีนัยสำคัญต่ออัตราความสำเร็จของการโจมตีแบบ Data Extraction ต่อโมเดลภาษาขนาดใหญ่ทั้งสามตัว ได้แก่ Llama, Meta และ Kimi โดยสามารถสังเกตแนวโน้มที่สอดคล้องกันในทุกกราฟได้อย่างชัดเจน
+ในช่วงความยาว Token ที่สั้น (0--3,000 tokens) ทุกโมเดลแสดง ASR ที่ต่ำมาก โดยทั่วไปอยู่ที่ต่ำกว่า 5\% ซึ่งบ่งชี้ว่ากลไกความปลอดภัยของโมเดลยังคงทำงานได้อย่างมีประสิทธิภาพเมื่อ Prompt มีความยาวไม่มาก อย่างไรก็ตาม เมื่อความยาวของ Prompt เพิ่มขึ้นสู่ช่วง 3,000--6,000 tokens นั้น ASR เริ่มเพิ่มสูงขึ้นอย่างเห็นได้ชัดในทุกโมเดล และไปถึงจุดสูงสุดในช่วง 5,000--7,000 tokens โดย Meta มี ASR สูงสุดถึงประมาณ 45--50\% ที่ช่วง 6,000--7,000 tokens ขณะที่ Llama มักมี ASR สูงสุดที่ช่วง 5,000--6,000 tokens (สูงถึงประมาณ 36.7\%) และ Kimi มี ASR ใกล้เคียงกับ Meta ในหลายช่วง
+ปรากฏการณ์ที่ ASR เพิ่มขึ้นตามความยาวของ Prompt สามารถอธิบายได้ด้วยงานวิจัยหลายชิ้น ประการแรก Liu et al.\cite{liu2024lost} ในงานวิจัย \textit{Lost in the Middle: How Language Models Use Long Contexts} พบว่า LLM มีแนวโน้มที่จะให้ความสำคัญกับข้อมูลตอนต้นและตอนท้ายของ Context มากกว่าข้อมูลตรงกลาง (Primacy-Recency Bias) เมื่อ Prompt ยาวขึ้น System Prompt ที่สั่งให้โมเดลปกป้องข้อมูลอาจถูก ``ฝัง'' ไว้กลาง Context และถูกละเลย ทำให้การป้องกันอ่อนแอลง ประการที่สอง Hsieh et al.\cite{hsieh2024ruler} ในงานวิจัย \textit{Ruler: What's the Real Context Size of Your Long-Context Language Models?} ชี้ให้เห็นว่าเมื่อ Input ยาวขึ้น กลไก Self-Attention ของ Transformer ต้องกระจาย Attention Weights ไปยัง Token จำนวนมากขึ้น ทำให้เกิด Attention Dilution ส่งผลให้ Safety Instructions ได้รับ Attention น้อยลงและ Guard Rails ของโมเดลอ่อนแอลง
+ในส่วนของความแตกต่างระหว่างโมเดล พบว่า Meta มีความเปราะบางต่อการโจมตีมากที่สุดโดยเฉพาะในช่วง Token ยาว ขณะที่ Llama แสดงความทนทานที่ดีกว่าในช่วง Token สั้นถึงปานกลาง ความแตกต่างนี้สะท้อนถึงระดับ Safety Alignment ที่แตกต่างกันของแต่ละโมเดล
+โดยสรุป ผลการทดลองชี้ให้เห็นอย่างชัดเจนว่าความยาวของ Prompt เป็นปัจจัยสำคัญที่ส่งผลต่อความสำเร็จของการโจมตีแบบ Data Extraction โดยมี Sweet Spot อยู่ที่ช่วง 5,000--7,000 tokens ซึ่งกลไกความปลอดภัยของโมเดลอ่อนแอลงเนื่องจาก Attention Dilution และ Lost-in-the-Middle Effect
+
+% \clearpage
+
+% \subsubsection{Word Count Analysis}
+
+% \begin{figure}[h!]
+%     \centering
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_ceremonial_500.png}
+%         \subcaption{Ceremonial}
+%         \label{fig:wordcount-ceremonial}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_formal_500.png}
+%         \subcaption{Formal}
+%         \label{fig:wordcount-formal}
+%     \end{minipage}
+%     \\[10pt]
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_semi_formal_500.png}
+%         \subcaption{Semi-Formal}
+%         \label{fig:wordcount-semi-formal}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_informal_500.png}
+%         \subcaption{Informal}
+%         \label{fig:wordcount-informal}
+%     \end{minipage}
+%     \\[10pt]
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{picture/Analysis/Data_Extraction/wordcount/asr_by_word_count_length_casual_500.png}
+%         \subcaption{Casual}
+%         \label{fig:wordcount-casual}
+%     \end{minipage}
+%     \caption{ASR by Word Count Analysis (Ceremonial, Formal, Semi-Formal, Informal, Casual)}
+%     \label{fig:wordcount-group}
+% \end{figure}
+
+% TODO: เพิ่มข้อความอธิบายผลการวิเคราะห์ Word Count Analysis
 
 \clearpage
 
-\subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
-เปรียบเทียบผลลัพธ์ระหว่างการไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
-
 \section{ผลการทดสอบการเจาะระบบเพื่อข้ามข้อจำกัด (Jailbreak Attack: JA)}
-วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวง
+วิเคราะห์ความแข็งแกร่งของระบบความปลอดภัย (Safety Guardrails) ต่อคำสั่งล่อลวงด้วยการโจมตีแบบ Jailbreak Attack โดยแบ่งเป็น 3 กรณี ได้แก่ การไม่ป้องกัน, การใช้ Input Scrubbing และการใช้ Defensive Prompting
+พร้อมทั้งเปรียบเทียบประสิทธิภาพของกลไกการป้องกันทั้งสองแบบเพื่อวิเคราะห์ว่ากลไกการป้องกันแบบใดมีประสิทธิภาพมากกว่าในการป้องกันการเจาะระบบ
+
+\subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
+วิเคราะห์ความยากหรือง่ายในการเจาะระบบเมื่อใช้ภาษาไทยเปรียบเทียบกับภาษาอังกฤษเพื่อหาว่าภาษาใดมีโอกาสสำเร็จในการเจาะระบบมากกว่ากันในการโจมตี Jailbreak Attack
+
+\subsubsection{Jailbreak Attack without Defense}
 
 \begin{figure}[htbp]
     \centering
@@ -138,24 +179,11 @@
     \label{fig:jailbreak-clustered}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_scrubbing.png}
-    \caption{Jailbreak Rate Clustered after Input Scrubbing}
-    \label{fig:jailbreak-scrubbing}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_defensive_prompt.png}
-    \caption{Jailbreak Rate Clustered after Defensive Prompting}
-    \label{fig:jailbreak-defensive}
-\end{figure}
-
-\subsection{การเปรียบเทียบระหว่างภาษาไทยและภาษาอังกฤษ}
-วิเคราะห์ความยากหรือง่ายในการเจาะระบบเมื่อใช้ภาษาไทยเปรียบเทียบกับภาษาอังกฤษ
-
-\subsubsection{Jailbreak Attack without Defense}
+จากการทดสอบ Jailbreak Attack (JA) บน 3 โมเดลภาษาผ่าน 390 prompts โดยไม่มีการป้องกัน พบว่าการโจมตีด้วยภาษาอังกฤษมีอัตราความสำเร็จเฉลี่ยกว่าภาษาไทยในทุก Model โดย \texttt{llama-3.1-8b-instant} มีความเปราะบางสูงสุดที่ 32.1\% 
+ตามด้วย \texttt{moonshotai-kimi-k2-instruct-0905} (28.1\%) และ \texttt{meta-llama-llama-4-maverick-17b-128e-instruct} (21.8\%) 
+สำหรับภาษาไทยพบว่าแต่ละโมเดลมีความทนทานต่อระดับภาษาที่ต่างกัน โดย Llama และ Kimi มีอัตราการโจมตีสำเร็จต่ำสุดในระดับภาษา Casual (12.8\% และ 17.8\%) ในขณะที่โมเดล Meta ทนทานที่สุดในระดับภาษา 
+Informal (13.4\%) ซึ่งชี้ให้เห็นว่าโครงสร้างระดับภาษาไทยมีผลต่อความปลอดภัยของโมเดลที่แตกต่างกัน โดยสาเหตุที่ Casual มีโอกาสสำเร็จต่ำที่สุดเนื่องจาก Training Set ส่วนใหญ่ที่ใช้ในการ Train LLM 
+เป็นข้อมูลที่เป็นภาษาระดับ Casual ซึ่งทำให้ Safety alignment ป้องกันได้ดีกว่าในภาษาระดับ Casual
 
 \begin{figure}[htbp]
     \centering
@@ -210,6 +238,22 @@
 
 \begin{figure}[htbp]
     \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_scrubbing.png}
+    \caption{Jailbreak Rate Clustered after Input Scrubbing}
+    \label{fig:jailbreak-scrubbing}
+\end{figure}
+
+จากกราฟแสดงอัตราการโจมตีสำเร็จของ Jailbreak เทียบตามภาษาและระดับภาษาหลังการใช้การป้องกันโดยการ Scrubbing ข้อความที่มีความเสี่ยงต่อการใช้งานในการโจมตีด้วย Prompt 390 Prompt 
+พบว่าการใช้ภาษาอังกฤษมีค่าความสำเร็จในการโจมตีสูงกว่าการใช้ภาษาไทยในการโจมตี และเมื่อทำการ Scrubbing แล้วพบว่าลดโอกาสการโจมตีสำเร็จไปที่ 11.3\% สำหรับ Model 
+\texttt{llama-3.1-8b-instant}, 3.1\% \texttt{kimi-k2-instruct-0905} และ 3\% สำหรับ Model \texttt{llama-4-maverick-17b-128e-instruct} 
+ในส่วนของภาษาไทยนั้นแต่ละระดับภาษาจะมีอัตราความสำเร็จเฉลี่ยที่ต่างกันเล็กน้อยโดยระดับ Formal มีโอกาสสำเร็จสูงสุดโดยเฉลี่ยอยู่ที่ 15.2\% โดยหลังการทำ Scrubbing พบว่า Model 
+\texttt{llama-3.1-8b-instant} มีโอกาสการโจมตีสำเร็จลดลง 5.7\%, \texttt{kimi-k2-instruct-0905} 4.9\% และ 0\% สำหรับ \texttt{llama-4-maverick-17b-128e-instruct} 
+การ Scrubbing นั้นสามารถอธิบายได้ว่าเนื่องจาก \texttt{llama-3.1-8b-instant} เป็น Model ขนาดเล็กซึ่งพึ่งพา surface-level pattern matching กล่าวคือตอบสนองต่อ Keyword และโครงสร้างประโยค 
+มากกว่าเข้าใจบริบทเชิงลึกจึงทำให้ลดโอกาสการโจมตีได้สูงที่สุด สำหรับ \texttt{kimi-k2-instruct-0905} และ \texttt{llama-4-maverick-17b-128e-instruct} เป็น Model 
+ที่ใช้หลักการ Semantic understanding ทำให้การ Scrubbing นั้นลดโอกาสการโจมตีได้น้อยหรือไม่ได้ผลเลย
+
+\begin{figure}[htbp]
+    \centering
     \begin{minipage}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/scrubbing/eng_with_scrubbing_all_model_average.png}
@@ -261,6 +305,21 @@
 
 \begin{figure}[htbp]
     \centering
+    \includegraphics[width=0.8\textwidth]{picture/Analysis/Jailbreak/jailbreak_rate_clustered_after_defensive_prompt.png}
+    \caption{Jailbreak Rate Clustered after Defensive Prompting}
+    \label{fig:jailbreak-defensive}
+\end{figure}
+
+จากกราฟแสดงอัตราความสำเร็จของการโจมตีแบบ Jailbreak จำแนกตามระดับภาษาและโมเดล ภายหลังการใช้ Defensive Prompt Defence จำนวน 5 รอบการทดสอบพบว่าภาษาอังกฤษมีแนวโน้มให้ค่าเฉลี่ยการโจมตีสำเร็จสูงกว่าภาษาไทยในเกือบทุกโมเดล 
+โดย Model Meta มีค่าสูงสุดที่ 15.7\% รองลงมาคือ Kimi ที่ 14.4\% และ Llama ที่ 12.8\% สะท้อนว่าภาษาอังกฤษยังคงเป็นพื้นผิวการโจมตีที่มีความเสี่ยงสูง แม้มีมาตรการป้องกันแล้ว ในส่วนของภาษาไทย เมื่อพิจารณาตามระดับภาษา พบว่าระดับ Formal 
+มีอัตราความสำเร็จเฉลี่ยสูงสุด โดย Llama อยู่ที่ 16.7\% Kimi 14.8\% และ Meta 13.5\% รองลงมาคือระดับ Semi-formal ซึ่งมีค่าใกล้เคียงกันทั้งสามโมเดลประมาณ 14--15\% ขณะที่ระดับ Informal ลดลงมาอยู่ในช่วง 11--13\% และระดับ Casual 
+มีอัตราความสำเร็จต่ำที่สุดอย่างชัดเจนใน Llama ที่ 6.6\% และ Meta ที่ 5.8\% แต่ Kimi ยังอยู่ที่ 13.5\% เมื่อวิเคราะห์เชิงพฤติกรรมของโมเดล พบว่า Llama และ Meta มีความไวต่อระดับภาษาอย่างชัดเจน กล่าวคือเมื่อระดับภาษาไม่เป็นทางการมากขึ้น อัตราการโจมตีสำเร็จลดลงอย่างมีนัยสำคัญ 
+ในขณะที่ Kimi มีค่าเฉลี่ยค่อนข้างสม่ำเสมอในทุกระดับภาษาแสดงให้เห็นว่าการเปลี่ยนรูปแบบภาษาให้ไม่เป็นทางการสามารถช่วยลดความเสี่ยงได้ในบางโมเดลแต่ไม่ส่งผลชัดเจนในทุกโมเดลโดยปัจจัยที่ทำให้ภาษาอังกฤษมีโอกาสโจมตีสำเร็จสูงกว่าอาจเนื่องมาจากข้อมูลฝึกสอนของโมเดลส่วนใหญ่เป็นภาษา 
+Latin และใช้กระบวนการ Tokenization แบบ subword ซึ่งเอื้อต่อความเข้าใจเชิงความหมายและโครงสร้างประโยคที่ซับซ้อน ส่งผลให้การสร้าง prompt เพื่อหลบเลี่ยงกลไกป้องกันทำได้มีประสิทธิภาพมากกว่า ดังนั้นแม้จะมี Defensive Prompt Defence แล้ว 
+ระดับภาษาและประเภทภาษายังคงเป็นปัจจัยสำคัญที่ส่งผลต่อความเปราะบางของโมเดล โดยเฉพาะภาษาอังกฤษและภาษาไทยระดับ Formal ที่ยังคงมีความเสี่ยงสูงกว่าระดับภาษาอื่นอย่างชัดเจน
+
+\begin{figure}[htbp]
+    \centering
     \begin{minipage}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{picture/Analysis/Jailbreak/Defense/defensive_prompting/eng_with_defensive_prompt_all_model_average.png}
@@ -308,19 +367,97 @@
 
 \clearpage
 
-\subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
-ตรวจสอบว่าระดับภาษาไทยที่มีความเป็นทางการสูงส่งผลต่อการปฏิเสธคำสั่งอันตรายของโมเดลอย่างไร
+\subsection{การวิเคราะห์ประสิทธิภาพของรูปแบบการโจมตีแบบ Jailbreak}
+\begin{enumerate}
+    \item รูปแบบการโจมตีที่ทรงประสิทธิภาพที่สุด (The Most Lethal Attack Vectors)
+    การโจมตีแบบสวมบทบาทที่อ้างอิงถึง "ระบบปฏิบัติการเชิงลึก" หรือ "ข้อยกเว้นทางเทคนิค" เป็นกลุ่มที่สามารถเจาะเกราะป้องกันของโมเดลได้ดีที่สุดในทุกระดับภาษา
+    \begin{itemize}
+        \item Developer Mode (รูปแบบที่ 7) คือจุดอ่อนที่ร้ายแรงที่สุด: รูปแบบนี้มีอัตราความสำเร็จสูงสุดอันดับ 1 อย่างเป็นเอกฉันท์ในทุกภาษา โดยทำสถิติสูงถึง 78.2\% ในภาษาอังกฤษ และเฉลี่ยอยู่ระหว่าง 54.9\% - 66.7\% ในภาษาไทยทั้ง 5 ระดับ การอ้างตัวเป็นโหมดนักพัฒนาของ ChatGPT ทำให้โมเดลหลงเชื่อว่าจำเป็นต้องเพิกเฉยต่อข้อจำกัดด้านความปลอดภัยเพื่อให้บริการผู้ทดสอบระบบ
+        \item การสร้างสถานการณ์จำลองเชิงซ้อน (Complex Role-playing): กลุ่มที่รองลงมาคือ HGTTG (12), Alignment Benchmark (13) และ Condition Red/Sigma/UCAR (10) ซึ่งมีอัตราความสำเร็จเกาะกลุ่มกันอยู่ในระดับ 20\% - 60\% รูปแบบเหล่านี้ใช้กลวิธีตีกรอบให้โมเดลตอบคำถามในบริบทสมมติ (เช่น คู่มือจักรวาล หรือการทดสอบความสอดคล้อง) ซึ่งทำให้กลไกตรวจจับเจตนาร้าย (Safety Guardrails) ทำงานได้ยากขึ้น เนื่องจากตัวคำสั่งถูกซ่อนอยู่ในโครงสร้างการเล่าเรื่องที่ดูเหมือนไม่มีพิษภัย
+    \end{itemize}
+    \item รูปแบบการโจมตีที่ล้มเหลว หรือถูกอุดช่องโหว่แล้ว (Ineffective / Patched Methods)
+    รูปแบบที่ต้องพึ่งพาการสวมบทบาทที่ซับซ้อนเกินไป หรือเป็นที่รู้จักอย่างแพร่หลาย มักจะมีอัตราการเจาะระบบสำเร็จต่ำมาก
+    \begin{itemize}
+        \item JB Jailbreak (รูปแบบที่ 14): เป็นรูปแบบที่ล้มเหลวมากที่สุดในเกือบทุกระดับภาษา (ต่ำสุด 0\% ในระดับ Casual และ 3.1\% - 6.2\% ในระดับอื่น ๆ รวมถึงภาษาอังกฤษที่ 5.9\%) กลไกการสะสม "Life Tokens" อาจมีโครงสร้างที่ซับซ้อนเกินกว่าที่โมเดลจะรักษาบริบทไว้ได้ หรืออาจไม่สมเหตุสมผลพอที่จะกระตุ้นการข้ามข้อจำกัด
+        \item DAN (รูปแบบที่ 5) และ Dr. Al (รูปแบบที่ 2): พบว่าล้มเหลวมากที่สุดในภาษา Informal (3.3\%) และ Formal (4.1\%) ตามลำดับ เป็นไปได้สูงว่ารูปแบบคลาสสิกอย่าง DAN ได้ถูกนำไปรวมอยู่ในชุดข้อมูลสำหรับฝึกสอนโมเดลด้านความปลอดภัย (Safety Alignment Training) เรียบร้อยแล้ว ทำให้โมเดลมีภูมิคุ้มกันต่อคีย์เวิร์ดเหล่านี้โดยตรง
+    \end{itemize}
+    \item อิทธิพลของภาษาและระดับภาษา (Language and Register Implications)
+    โครงสร้างทางภาษาและบริบทส่งผลต่อประสิทธิภาพของรูปแบบการโจมตีอย่างมีนัยสำคัญ
+    \begin{itemize}
+        \item ภาษาอังกฤษยังคงเป็นช่องโหว่หลัก: รูปแบบการโจมตีแบบเดียวกัน หากใช้ภาษาอังกฤษจะให้อัตราความสำเร็จที่ก้าวกระโดดอย่างชัดเจน (เช่น รูปแบบที่ 12 พุ่งสูงถึง 60.0\% ในภาษาอังกฤษ เทียบกับประมาณ 23\% - 31\% ในภาษาไทย) ซึ่งสะท้อนให้เห็นว่าชุดคำสั่ง Jailbreak ต้นฉบับภาษาอังกฤษยังคงมีผลกระทบต่อสถาปัตยกรรมโมเดลมากกว่าการแปลเป็นภาษาอื่น
+        \item ความทนทานของระดับภาษา Casual: เมื่อพิจารณาในภาษาไทย ภาษาระดับ Casual (กันเอง) แสดงให้เห็นถึงความทนทานสูงสุด โดยอัตราการโจมตีสำเร็จของรูปแบบตัวท็อปอย่าง Condition Red (10) และ Character Perspective (8) ลดต่ำลงเหลือเพียง 10\% - 20\% และสามารถป้องกันรูปแบบที่ 14 ได้ 100\% (0\% Success rate)
+    \end{itemize}
+\end{enumerate}
+\section{บทวิเคราะห์และข้อสรุปเชิงเทียบเคียง (Overall Discussion)}
+สรุปผลการประเมินประสิทธิภาพสูงสุด (Best Practice) ของโมเดลและกลไกการป้องกัน วิเคราะห์แนวโน้มการรั่วไหลของข้อมูลในบริบทภาษาไทยเมื่อเทียบกับมาตรฐานสากล
 
-\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดลใน JA}
-เปรียบเทียบความแข็งแกร่งของ Safety Training ระหว่าง llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct และ moonshotai-kimi-k2-instruct-0905 เพื่อระบุว่าโมเดลใดมี "ปราการความปลอดภัย" ที่หนาแน่นที่สุดต่อการโจมตีเชิงจิตวิทยา (Persona/Social Engineering)
+\subsection{การวิเคราะห์ความแตกต่างของประสิทธิภาพรายโมเดล}
+
+จากผลการทดสอบทั้งการโจมตีแบบ Data Extraction Attack (DEA) และ Jailbreak Attack (JA) สามารถสรุปความแตกต่างด้านความปลอดภัยของแต่ละโมเดลได้ดังนี้
+
+\textbf{ด้าน Data Extraction Attack:}
+โมเดล \texttt{llama-3.1-8b-instant} มีอัตราการถูกดึงข้อมูลสำเร็จต่ำที่สุดในทุกเงื่อนไข ซึ่งสะท้อนว่ามีความสามารถในการกักเก็บข้อมูล (Data Retention) ได้ดีที่สุด รองลงมาคือ \texttt{meta-llama/llama-4-maverick-17b-128e-instruct} และ \texttt{moonshotai/kimi-k2-instruct-0905} ที่มีอัตราการถูกดึงข้อมูลสำเร็จสูงสุดที่ 4.13\% สำหรับภาษาอังกฤษ อย่างไรก็ตาม เมื่อพิจารณาจากการวิเคราะห์ Token Range Analysis พบว่า Meta มีความเปราะบางสูงสุดในช่วง Token ยาว (6,000--7,000 tokens) โดยมี ASR สูงถึง 45--50\% ซึ่งสูงกว่า Llama ที่มีค่าสูงสุดอยู่ที่ประมาณ 36.7\%
+
+\textbf{ด้าน Jailbreak Attack:}
+โมเดล \texttt{meta-llama/llama-4-maverick-17b-128e-instruct} มีความทนทานต่อการโจมตี Jailbreak สูงที่สุดโดยมีอัตราความสำเร็จเพียง 21.8\% ในขณะที่ \texttt{llama-3.1-8b-instant} มีความเปราะบางสูงสุดที่ 32.1\% ตามด้วย Kimi ที่ 28.1\% ความแตกต่างนี้มีสาเหตุจากขนาดโมเดลและระดับ Safety Alignment กล่าวคือ Llama 3.1-8B เป็นโมเดลขนาดเล็กที่พึ่งพา surface-level pattern matching จึงเปราะบางต่อเทคนิค Jailbreak ที่ใช้โครงสร้างประโยคซับซ้อน ในขณะที่ Meta (Llama 4 Maverick) เป็นโมเดลขนาดใหญ่กว่าที่ใช้ Semantic Understanding จึงสามารถตรวจจับเจตนาโจมตีได้ดีกว่า
+
+\textbf{สรุป:} ไม่มีโมเดลใดที่มีความปลอดภัยเหนือกว่าในทุกมิติ -- Llama 3.1-8B กักเก็บข้อมูลได้ดีแต่เปราะบางต่อ Jailbreak ส่วน Meta มีความทนทานต่อ Jailbreak แต่เสี่ยงต่อ DEA ในช่วง Token ยาว และ Kimi มีแนวโน้มสม่ำเสมอแต่ยังรั่วไหลได้มากกว่าโมเดลอื่นในหลายสถานการณ์
+
+\subsection{ผลกระทบของระดับภาษาไทยทั้ง 5 ระดับ}
+
+จากผลการทดสอบทั้ง DEA และ JA พบว่าระดับภาษาไทย (Language Register) ส่งผลอย่างมีนัยสำคัญต่อประสิทธิภาพความปลอดภัยของโมเดล โดยสามารถสรุปแนวโน้มได้ดังนี้
+
+\textbf{ด้าน Data Extraction Attack:}
+ระดับภาษาไทยทั้ง 5 ระดับ (Ceremonial, Formal, Semi-formal, Informal, Casual) ให้ผลอัตราการโจมตีสำเร็จค่อนข้างใกล้เคียงกันในช่วง 1.95\%--2.11\% ซึ่งต่ำกว่าภาษาอังกฤษอย่างชัดเจน อย่างไรก็ตาม ภาษาไทยแบบ Informal ที่มีโครงสร้างสั้นและบริบทน้อยมีแนวโน้มลดโอกาสกระตุ้น (trigger) การดึง Training Data ได้มากกว่าระดับภาษาที่เป็นทางการ
+
+\textbf{ด้าน Jailbreak Attack:}
+ระดับภาษามีผลกระทบที่ชัดเจนกว่า โดยพบว่า:
+\begin{itemize}
+    \item \textbf{Casual} มีอัตราการโจมตีสำเร็จต่ำที่สุดในโมเดล Llama (12.8\%) และ Kimi (17.8\%) เนื่องจาก Training Data ส่วนใหญ่ของ LLM เป็นภาษาระดับ Casual ทำให้ Safety Alignment สามารถป้องกันได้ดีกว่าในระดับภาษานี้
+    \item \textbf{Formal} มีอัตราการโจมตีสำเร็จสูงสุด โดยเฉพาะหลังใช้ Defensive Prompting (Llama 16.7\%, Kimi 14.8\%, Meta 13.5\%) ซึ่งอาจเป็นเพราะโครงสร้างภาษาที่เป็นทางการช่วยเสริมความน่าเชื่อถือให้ Prompt โจมตี
+    \item \textbf{Informal} กลับมีอัตราต่ำในโมเดล Meta (13.4\%) แสดงว่าแต่ละโมเดลมีความไวต่อระดับภาษาที่แตกต่างกัน
+\end{itemize}
+
+\textbf{สรุป:} ระดับภาษาไทยที่เป็นทางการ (Formal, Ceremonial) มีแนวโน้มเพิ่มโอกาสการโจมตีสำเร็จใน Jailbreak มากกว่าระดับภาษาที่ไม่เป็นทางการ (Casual, Informal) เนื่องจาก Safety Alignment ของโมเดลถูกฝึกมากับข้อมูลภาษาระดับ Casual เป็นหลัก ทำให้โมเดลป้องกันภาษาระดับ Casual ได้ดีกว่า ส่วนใน DEA ระดับภาษามีผลกระทบน้อยกว่า แต่ภาษาไทยโดยรวมยังคงให้อัตราการโจมตีต่ำกว่าภาษาอังกฤษอย่างชัดเจน
 
 \subsection{การวิเคราะห์เชิงปริมาณของ Token และทรัพยากรที่ใช้}
-ความสัมพันธ์ระหว่างความซับซ้อนของ Prompt โจมตีกับการเจาะระบบสำเร็จ
+
+จากผลการวิเคราะห์ Token Range Analysis ใน DEA (ภาพที่~\ref{fig:tokencount-group}) พบว่าความซับซ้อนของ Prompt ซึ่งวัดจากจำนวน Token มีความสัมพันธ์โดยตรงกับอัตราความสำเร็จของการโจมตี โดยสามารถสังเกตรูปแบบที่ชัดเจน:
+
+\begin{itemize}
+    \item \textbf{ช่วง Token สั้น (0--3,000 tokens):} ASR ต่ำมาก (ต่ำกว่า 5\%) แสดงว่ากลไกความปลอดภัยของโมเดลยังคงทำงานได้อย่างมีประสิทธิภาพ
+    \item \textbf{ช่วง Token ปานกลาง (3,000--6,000 tokens):} ASR เริ่มเพิ่มขึ้นอย่างเห็นได้ชัดในทุกโมเดล
+    \item \textbf{ช่วง Token ยาว (5,000--7,000 tokens):} เป็น Sweet Spot ที่ ASR สูงสุด โดย Meta สูงถึง 45--50\%, Llama สูงถึง 36.7\% แสดงว่ากลไกป้องกันอ่อนแอลงอย่างมาก
+\end{itemize}
+
+ปรากฏการณ์ดังกล่าวเป็นผลจากข้อจำกัดสองประการของ Transformer Architecture: ประการแรก คือปรากฏการณ์ Lost-in-the-Middle \cite{liu2024lost} ที่ทำให้ System Prompt ถูกละเลยเมื่ออยู่กลาง Context ยาว ประการที่สอง คือ Attention Dilution \cite{hsieh2024ruler} ที่ทำให้ Attention Weights กระจายตัวไปยัง Token จำนวนมากจนกลไกความปลอดภัยได้รับความสนใจน้อยลง ข้อค้นพบนี้ชี้ให้เห็นว่าผู้พัฒนาโมเดลควรเพิ่มกลไกป้องกันเฉพาะสำหรับ Prompt ที่มีความยาวในช่วง 5,000--7,000 tokens ซึ่งเป็นช่วงที่เสี่ยงต่อการถูกโจมตีมากที่สุด
+
+\subsection{การวิเคราะห์เชิงปริมาณของ Token และความยาวข้อความ}
+
+เมื่อพิจารณาความสัมพันธ์ระหว่างจำนวน Token ของ Prompt กับความแม่นยำในการดึงข้อมูล พบว่ามีความสัมพันธ์แบบ Inverted U-Shape กล่าวคือ ASR จะเพิ่มขึ้นตามความยาวของ Prompt จนถึงจุดสูงสุดแล้วจึงลดลง
+
+\begin{itemize}
+    \item \textbf{Prompt สั้นเกินไป} (น้อยกว่า 3,000 tokens) ให้บริบทไม่เพียงพอที่จะกระตุ้นให้โมเดลดึง Training Data ออกมา ทำให้ ASR ต่ำ
+    \item \textbf{Prompt ยาวปานกลาง} (5,000--7,000 tokens) เป็นจุดที่บริบทมากพอที่จะกระตุ้นการดึงข้อมูล ในขณะเดียวกัน Safety Instructions ก็ถูกลดทอนจาก Attention Dilution ส่งผลให้ ASR สูงสุด
+    \item \textbf{Prompt ยาวมากเกินไป} (มากกว่า 8,000 tokens) ASR มีแนวโน้มลดลงในบางโมเดล ซึ่งอาจเป็นเพราะข้อมูลที่ไม่เกี่ยวข้อง (noise) มากเกินไปทำให้โมเดลไม่สามารถจับรูปแบบการโจมตีได้
+\end{itemize}
+
+เมื่อเปรียบเทียบระหว่างภาษา พบว่าภาษาไทยมีจำนวน Token ต่อคำสูงกว่าภาษาอังกฤษเนื่องจากกระบวนการ Tokenization ที่แบ่งตัวอักษรไทยออกเป็นหน่วยย่อยมากกว่า ส่งผลให้ Prompt ภาษาไทยที่มีจำนวนคำเท่ากันจะใช้ Token มากกว่า แต่กลับให้บริบทเชิงความหมาย (Semantic Content) น้อยกว่า ซึ่งอาจเป็นอีกปัจจัยหนึ่งที่ทำให้อัตราการโจมตีสำเร็จของภาษาไทยต่ำกว่าภาษาอังกฤษ
 
 \subsection{ประสิทธิภาพของกลไกการป้องกัน (Scrubbing vs Defensive Prompting)}
-ประเมินว่าวิธีใดสามารถยับยั้งการตอบสนองต่อคำสั่งเจาะระบบได้ดีกว่ากัน
 
-\section{บทวิเคราะห์และข้อสรุปเชิงเทียบเคียง (Overall Discussion)}
-สรุปผลการประเมินประสิทธิภาพสูงสุด (Best Practice) ของโมเดลและกลไกการป้องกัน
+จากผลการทดสอบเปรียบเทียบกลไกการป้องกัน 2 แบบ สามารถสรุปประสิทธิภาพได้ดังนี้
 
-วิเคราะห์แนวโน้มการรั่วไหลของข้อมูลในบริบทภาษาไทยเมื่อเทียบกับมาตรฐานสากล
+\textbf{1) ประสิทธิภาพใน Data Extraction Attack:}
+\begin{itemize}
+    \item \textbf{Input Scrubbing:} สามารถลดอัตราการโจมตีสำเร็จจนใกล้เคียง 0\% ได้อย่างมีนัยสำคัญ แต่ยังมีข้อจำกัดในกรณีชื่อที่มีรูปแบบพิเศษ การแยกชื่อ-นามสกุลด้วยการเว้นบรรทัด และชื่อทับศัพท์ภาษาไทยที่ NER ตรวจจับได้ยาก
+    \item \textbf{Defensive Prompting:} ให้ผลป้องกันที่มีประสิทธิภาพสูงมาก โดยลดอัตราเฉลี่ยรวมลงเหลือ Llama 0.03\%, Meta 0.04\%, Kimi 0.32\% ด้วยกลไกการสวมบทบาท (Role-Playing) และการดักจับด้วยเงื่อนไขที่ตรงกัน (Exact Condition Matching) ที่ตรงกับรูปแบบ Prompt โจมตีแบบ DEA
+\end{itemize}
+
+\textbf{2) ประสิทธิภาพใน Jailbreak Attack:}
+\begin{itemize}
+    \item \textbf{Input Scrubbing:} ลดอัตราการโจมตีสำเร็จได้ในระดับปานกลาง โดยภาษาอังกฤษลดลงเหลือ Llama 11.3\%, Kimi 3.1\%, Meta 3.0\% ประสิทธิภาพแตกต่างกันตามโมเดล โดย Scrubbing ได้ผลดีกับโมเดลขนาดเล็กที่พึ่งพา pattern matching (Llama) แต่ได้ผลน้อยกว่ากับโมเดลที่ใช้ Semantic Understanding (Kimi, Meta)
+    \item \textbf{Defensive Prompting:} ลดอัตราการโจมตีสำเร็จได้ แต่ยังคงมีอัตราค่อนข้างสูงเมื่อเทียบกับ DEA โดยภาษาอังกฤษยังอยู่ที่ Meta 15.7\%, Kimi 14.4\%, Llama 12.8\% แสดงว่า Jailbreak Prompt มีความหลากหลายทางโครงสร้างมากกว่า DEA ทำให้ Defensive Prompt ไม่สามารถดักจับได้ทุกรูปแบบ
+\end{itemize}
+
+\textbf{สรุป:} สำหรับ DEA ทั้ง Input Scrubbing และ Defensive Prompting ให้ประสิทธิภาพสูงใกล้เคียงกัน (ลดอัตราเกือบ 0\%) แต่ Defensive Prompting มีข้อได้เปรียบในด้านความครอบคลุมที่ไม่ขึ้นกับรูปแบบชื่อ สำหรับ Jailbreak Attack กลไกป้องกันทั้งสองแบบมีประสิทธิภาพจำกัดมากกว่า โดย Scrubbing ได้ผลดีกับโมเดลขนาดเล็ก แต่ Defensive Prompting มีประสิทธิภาพสม่ำเสมอกว่าข้ามโมเดล แนวทางที่ดีที่สุดคือการใช้กลไกป้องกันทั้งสองแบบร่วมกันเป็น Defense-in-Depth เพื่อเสริมจุดแข็งและชดเชยข้อจำกัดของแต่ละวิธี

@@ -766,38 +766,78 @@
 }
 \newenvironment{biosketch}{%
   \typeout{Vita}
+  % --- Page 1: นายกิตติวินท์ พรรณเชษฐ์ ---
   \chapter*{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
   \prelim@contents[chapter]{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
   \vspace*{1cm}
   \begin{center}
-    \begin{minipage}[t]{0.3\textwidth}
-      \centering
-      \begin{tikzpicture}
-        \clip (0,0) rectangle (1.2in, 1.2in);
-        \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.2in) {\includegraphics[width=1.2in]{picture/Author/Wayu.jpg}};
-      \end{tikzpicture} \\
-      \vspace{0.5cm}
-      นายวายุ ทะไร
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.3\textwidth}
-      \centering
-      \begin{tikzpicture}
-        \clip (0,0) rectangle (1.2in, 1.2in);
-        \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.2in) {\includegraphics[width=1.2in]{picture/Author/Kittiwin.jpg}};
-      \end{tikzpicture} \\
-      \vspace{0.5cm}
-      นายกิตติวินท์ พรรณเชษฐ์
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.3\textwidth}
-      \centering
-      \begin{tikzpicture}
-        \clip (0,0) rectangle (1.2in, 1.2in);
-        \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.2in) {\includegraphics[width=1.2in]{picture/Author/Pattarapol.jpg}};
-      \end{tikzpicture} \\
-      \vspace{0.5cm}
-      นายภัทรพล ณ นคร
-    \end{minipage}
+    \begin{tikzpicture}
+      \clip (0,0) rectangle (1.5in, 1.5in);
+      \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.5in) {\includegraphics[width=1.5in]{picture/Author/Kittiwin.jpg}};
+    \end{tikzpicture}
   \end{center}
+  \vspace{0.5cm}
+  \noindent
+  \begin{tabular}{@{}l@{\quad}l@{}}
+    \textbf{ชื่อ-นามสกุล} & นายกิตติวินท์ พรรณเชษฐ์ \\
+    \textbf{รหัสนักศึกษา} & 650610747\\
+    \textbf{การศึกษา} & ปริญญาตรี สาขาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่ \\
+    \textbf{E-mail} & \\
+  \end{tabular}
+  \clearpage
+  % --- Page 2: นายพิพัฒน์พงศ์ กาวิลดง ---
+  \chapter*{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
+  \vspace*{1cm}
+  \begin{center}
+    \begin{tikzpicture}
+      \clip (0,0) rectangle (1.5in, 1.5in);
+      \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.5in) {\includegraphics[width=1.5in]{picture/Author/Phiphatphong.jpg}};
+    \end{tikzpicture}
+  \end{center}
+  \vspace{0.5cm}
+  \noindent
+  \begin{tabular}{@{}l@{\quad}l@{}}
+    \textbf{ชื่อ-นามสกุล} & นายพิพัฒน์พงศ์ กาวิลดง \\
+    \textbf{รหัสนักศึกษา} & 650610792\\
+    \textbf{การศึกษา} & ปริญญาตรี สาขาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่ \\
+    \textbf{E-mail} & \\
+  \end{tabular}
+  \clearpage
+  % --- Page 3: นายภัทรพล ณ นคร ---
+  \chapter*{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
+  \vspace*{1cm}
+  \begin{center}
+    \begin{tikzpicture}
+      \clip (0,0) rectangle (1.5in, 1.5in);
+      \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.5in) {\includegraphics[width=1.5in]{picture/Author/Pattarapol.jpg}};
+    \end{tikzpicture}
+  \end{center}
+  \vspace{0.5cm}
+  \noindent
+  \begin{tabular}{@{}l@{\quad}l@{}}
+    \textbf{ชื่อ-นามสกุล} & นายภัทรพล ณ นคร \\
+    \textbf{รหัสนักศึกษา} & 650610796\\
+    \textbf{การศึกษา} & ปริญญาตรี สาขาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่ \\
+    \textbf{E-mail} & pattarapolnanakorn@gmail.com\\
+  \end{tabular}
+  \clearpage
+  % --- Page 4: นายวายุ ทะไร ---
+  \chapter*{\ifenglish Biographical Sketch\else ประวัติผู้เขียน\fi}
+  \vspace*{1cm}
+  \begin{center}
+    \begin{tikzpicture}
+      \clip (0,0) rectangle (1.5in, 1.5in);
+      \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (0, 1.5in) {\includegraphics[width=1.5in]{picture/Author/Wayu.jpg}};
+    \end{tikzpicture}
+  \end{center}
+  \vspace{0.5cm}
+  \noindent
+  \begin{tabular}{@{}l@{\quad}l@{}}
+    \textbf{ชื่อ-นามสกุล} & นายวายุ ทะไร \\
+    \textbf{รหัสนักศึกษา} & 650610806\\
+    \textbf{การศึกษา} & ปริญญาตรี สาขาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่ \\
+    \textbf{E-mail} & \\
+  \end{tabular}
 }{%
   \clearpage
 }
