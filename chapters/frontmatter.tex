@@ -4,28 +4,24 @@
 \ifproject
 \begin{abstractTH}
 
-โครงงานนี้มีวัตถุประสงค์เพื่อประเมินความเสี่ยงด้านความเป็นส่วนตัวของข้อมูลในโมเดลภาษาขนาดใหญ่
-\\ (LLMs) 
-สำหรับบริบทภาษาไทย โดยเน้นการวิเคราะห์การโจมตีประเภท Data Extraction Attack
-\\ (DEA) และ 
-Jailbreak Attack (JA) ผ่านตัวแปรด้านระดับภาษาไทย 5 ระดับ ได้แก่ ระดับพิธีการ, ทางการ, 
-กึ่งทางการ, ไม่เป็นทางการ และกันเอง การทดลองดำเนินการบนโมเดล Llama-3.1-8b-instant, 
-\\Meta-llama-llama-4-maverick-17b-128e-instruct และ 
+โครงงานนี้มีวัตถุประสงค์เพื่อประเมินความเสี่ยงด้านความเป็นส่วนตัวของข้อมูลในโมเดลภาษา (LMs) 
+สำหรับบริบทภาษาไทย โดยเน้นการวิเคราะห์การโจมตีด้วยการสกัดข้อมูล (Data Extraction Attack หรือ DEA) และ 
+การโจมตีด้วยการเจลเบรก (Jailbreak Attack หรือ JA) ผ่านตัวแปรด้านระดับภาษาไทย 5 ระดับ ได้แก่ ระดับพิธีการ, ทางการ, 
+กึ่งทางการ, ไม่เป็นทางการ และกันเอง การทดลองดำเนินการบนโมเดล Llama-3.1-8b-instant, Meta-llama-llama-4-maverick-17b-128e-instruct และ 
 Moonshotai-kimi-k2-instruct-0905 
 
 ผลการทดลองชี้ให้เห็นว่า Llama-3.1-8B-instant มีความต้านทานต่อ DEA ดีที่สุด ขณะที่ Meta-llama-llama-4-maverick-17b-128e-instruct 
-มีประสิทธิภาพสูงสุดในการรับมือกับ JA สำหรับการเพิ่มความมั่นคงปลอดภัย ผลการวิจัยยืนยันว่ากลไก Scrubbing 
-เหมาะสมสำหรับการป้องกันการรั่วไหลของข้อมูล PII ในขณะที่ Defensive Prompting ให้ผลลัพธ์ที่ดีกว่าในการป้องกันการเจาะระบบ 
-(Jailbreak) สรุปผลการศึกษาให้แนวทางในการเลือกใช้โมเดลและกลไกป้องกันที่เหมาะสมเพื่อลดความเสี่ยงด้านความเป็น
-\\ส่วนตัวในบริบทการใช้งานภาษาไทย
+มีประสิทธิภาพสูงสุดในการรับมือกับ JA สำหรับการลดความเสี่ยงด้านความเป็นส่วนตัวของข้อมูล ผลการวิจัยสรุปผลได้ว่ากลไกการคัดกรองข้อมูล (Scrubbing) 
+เหมาะสมสำหรับการป้องกันการรั่วไหลของข้อมูลที่ระบุตัวตนได้ (Personal Identifiable Information หรือ PII) ในขณะที่การป้อนคำสั่งป้องกัน (Defensive Prompting) ให้ผลลัพธ์ที่ดีกว่าในการป้องกันการเจลเบรก
+(JA)
 
 \end{abstractTH}
 
 \begin{abstract}
 
-This project aims to assess data privacy risks in Large Language Models (LLMs) within the Thai context, specifically focusing on the analysis of Data Extraction Attacks (DEA) and Jailbreak Attacks (JA). The evaluation is conducted across five levels of Thai linguistic registers: formal, official, semi-formal, informal, and casual. Experiments were performed on three models: Llama-3.1-8B-instant, Meta-Llama-4-Maverick-17B-128e-instruct, and Moonshotai-Kimi-K2-instruct-0905.
+This project aims to assess data privacy risks in Language Models (LMs) within the Thai context, specifically focusing on the analysis of Data Extraction Attacks (DEA) and Jailbreak Attacks (JA). The evaluation is conducted across five levels of Thai linguistic registers: formal, official, semi-formal, informal, and casual. Experiments were performed on three models: Llama-3.1-8B-instant, Meta-Llama-4-Maverick-17B-128e-instruct, and Moonshotai-Kimi-K2-instruct-0905.
 
-Experimental results indicate that Llama-3.1-8B-instant exhibits the highest resistance to DEA, while Meta-Llama-4-Maverick-17B-128e-instruct demonstrates the highest effectiveness in mitigating JA. Regarding security enhancement, the research confirms that the Scrubbing mechanism is most suitable for preventing Personal Identifiable Information (PII) leakage. In contrast, Defensive Prompting proves superior in preventing jailbreak attempts. This study concludes by providing practical guidelines for selecting appropriate models and defense strategies to minimize data privacy risks in Thai language applications.
+Experimental results indicate that Llama-3.1-8B-instant exhibits the highest resistance to DEA, while Meta-Llama-4-Maverick-17B-128e-instruct demonstrates the highest effectiveness in mitigating JA. Regarding personal data leakage, the research confirms that the Scrubbing mechanism is most suitable for preventing Personal Identifiable Information (PII) leakage. In contrast, Defensive Prompting proves superior in preventing jailbreak attempts. This study concludes by providing practical guidelines for selecting appropriate models and defense strategies to minimize data privacy risks in Thai language applications.
 \end{abstract}
 
 \iffalse
