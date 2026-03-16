@@ -35,6 +35,44 @@
 \usepackage[hypcap=false]{caption}
 \usepackage{subcaption}
 
+%% For code listings in appendix
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=1em,
+  framexleftmargin=0.5em,
+  literate={-}{-}1,
+}
+\lstdefinestyle{bash}{
+  language=bash,
+  morekeywords={pip,python,git,conda,source,cd,activate},
+  keywordstyle=\color{blue!70!black},
+  stringstyle=\color{red!70!black},
+  commentstyle=\color{green!50!black}\itshape,
+}
+\lstdefinestyle{python}{
+  language=Python,
+  keywordstyle=\color{blue!70!black},
+  stringstyle=\color{red!70!black},
+  commentstyle=\color{green!50!black}\itshape,
+}
+\lstdefinestyle{env}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+}
+
 %% Some other useful packages. Look these up to find out how to use
 %% them.
 % \usepackage{natbib}    % for author-year citation styles
