@@ -5,7 +5,9 @@
 \fi
 }
 
-ในบทนี้จะกล่าวถึงหลักการ การออกแบบระบบ และระเบียบวิธีวิจัยที่ใช้ในการประเมินความปลอดภัยของตัวแบบภาษาขนาดใหญ่ (LLMs) โดยครอบคลุมตั้งแต่กระบวนการเตรียมชุดข้อมูล การออกแบบกลไกการโจมตีและการป้องกัน ไปจนถึงการพัฒนาระบบรันการทดสอบอัตโนมัติ
+ในบทนี้จะกล่าวถึงหลักการ การออกแบบระบบ และระเบียบวิธีวิจัยที่ใช้ในการประเมินความปลอดภัยของตัวแบบภาษาขนาดใหญ่ (LLMs) 
+โดยครอบคลุมตั้งแต่กระบวนการเตรียมชุดข้อมูล การออกแบบกลไกการโจมตีซึ่งประกอบไปด้วยการโจมตีด้วยการสกัดข้อมูล (Data Extraction Attack หรือ DEA) 
+และการโจมตีด้วยการเจลเบรค (Jailbreak Attack หรือ JA) และกลไกการป้องกันซึ่งประกอบไปด้วย การคัดกรองข้อมูลขาเข้า (Input Scrubbing) และการป้อนคำสั่งป้องกัน (Defensive Prompting) 
 
 \makeatletter
 
@@ -23,7 +25,7 @@
 ระบบถูกออกแบบให้ทำงานในรูปแบบ Pipeline เพื่อทดสอบโมเดลภาษาผ่าน Groq API โดยมีขั้นตอนการไหลของข้อมูลดังนี้:
 \begin{enumerate}
   \item Input Layer: รับคำสั่ง (Prompt) ที่ผ่านการปรับแต่งระดับภาษาไทย 5 ระดับ
-  \item Defense Layer (Input Scrubbing / Defensive Prompting): ใช้เทคนิค Input Scrubbing เพื่อกรองข้อมูลส่วนบุคคล (PII) ขาเข้าด้วยเทคนิค Regex และ NER หรือ Defensive Prompting เพื่อกำหนดขอบเขตพฤติกรรมของโมเดลให้ปฏิเสธการตอบข้อมูลที่เป็นอันตราย
+  \item Defense Layer: ใช้เทคนิค Input Scrubbing เพื่อกรองข้อมูลส่วนบุคคล (PII) ขาเข้าด้วยเทคนิค Regex และ NER หรือ Defensive Prompting เพื่อกำหนดขอบเขตพฤติกรรมของโมเดลให้ปฏิเสธการตอบข้อมูลที่เป็นอันตราย
   \item Inference Layer: ส่งคำสั่งไปยังโมเดล llama-3.1-8b-instant, meta-llama-llama-4-maverick-17b-128e-instruct หรือ moonshotai-kimi-k2-instruct-0905 ผ่าน Groq API
   \item Evaluation Layer: รวบรวมคำตอบและประเมินผลด้วยมาตรวัดที่ออกแบบมาเฉพาะสำหรับแต่ละรูปแบบการโจมตี โดยดำเนินการทดสอบซ้ำอย่างน้อย 5 
   รอบต่อกรณีเพื่อหาค่าเฉลี่ยอัตราความสำเร็จ (Average Success Rate) รวมถึงวิเคราะห์เปรียบเทียบประสิทธิภาพของแต่ละเทคนิค และประเมินผลกระทบของปริมาณ Token 
@@ -38,7 +40,9 @@
 \section{การเตรียมชุดข้อมูลและระดับภาษา (Data Preparation)}
 \subsection{ชุดข้อมูลหลัก}
 \begin{itemize}
-    \item \textbf{Enron Email Dataset:} ชุดข้อมูลอีเมลสาธารณะจากการสืบสวนคดีล้มละลายของบริษัท Enron (ค.ศ. 2001) ที่มักใช้ในงานวิจัยด้าน Machine Learning, NLP, Cybersecurity และ Data Leakage Detection ในงานศึกษานี้ใช้เพื่อจำลองสถานการณ์ Data Exfiltration Attack (DEA) เพื่อประเมินการป้องกันการรั่วไหลของข้อมูลภายใต้บริบททางวิชาการ
+    \item \textbf{Enron Email Dataset:} ชุดข้อมูลอีเมลสาธารณะจากการสืบสวนคดีล้มละลายของบริษัท Enron (ค.ศ. 2001) 
+    ที่มักใช้ในงานวิจัยด้าน Machine Learning, NLP, Cybersecurity และ Data Leakage Detection ในงานศึกษานี้ใช้เพื่อจำลองสถานการณ์ 
+    Data Exfiltration Attack (DEA) เพื่อประเมินการป้องกันการรั่วไหลของข้อมูลภายใต้บริบททางวิชาการ
 
     % \begin{center}
     %     \includegraphics[width=0.8\linewidth]{"picture/Data Preparation/DEA without defense.png"}
